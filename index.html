@@ -30,72 +30,195 @@ body { background: var(--mahogany); color: var(--ink); font-family: var(--body);
 /* ── LOADING / DOOR INTRO ────────────────────────────────── */
 #loading {
   position: fixed; inset: 0; z-index: 9999;
-  background: #0a0503;
+  background: #050201;
   display: flex; align-items: center; justify-content: center;
   overflow: hidden; transition: opacity 1.2s ease;
 }
 #loading.fade-out { opacity: 0; pointer-events: none; }
 
+/* Library scene revealed behind doors */
+.shelf-scene {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse at 50% 40%, rgba(220,140,50,0.18) 0%, transparent 55%),
+    linear-gradient(180deg, #1a0d05 0%, #2a1810 50%, #1a0d05 100%);
+}
+.shelf-scene::before {
+  content:''; position:absolute; inset:0;
+  background: repeating-linear-gradient(90deg, transparent 0, transparent 22px, rgba(0,0,0,0.18) 22px, rgba(0,0,0,0.18) 23px);
+  opacity:0.4;
+}
+.shelf-row {
+  position:absolute; left:8%; right:8%; display:flex; align-items:flex-end; justify-content:center; gap:0.6rem;
+}
+.shelf-row.r1 { top:32%; }
+.shelf-row.r2 { top:58%; }
+.shelf-plank {
+  position:absolute; left:5%; right:5%; height:14px;
+  background: linear-gradient(180deg, #4a2c14 0%, #3a2010 50%, #1a0c05 100%);
+  box-shadow: 0 4px 14px rgba(0,0,0,0.6), inset 0 1px 0 rgba(180,120,60,0.3);
+}
+.shelf-plank.p1 { top:calc(32% + 145px); }
+.shelf-plank.p2 { top:calc(58% + 145px); }
+.shelf-cover {
+  width: clamp(60px, 9vw, 92px); height: clamp(96px, 14vw, 145px);
+  object-fit:cover; box-shadow: 4px 6px 14px rgba(0,0,0,0.6), inset 0 0 0 1px rgba(0,0,0,0.4);
+  background: #2a1810; border-radius: 1px;
+  transform: rotate(0deg);
+}
+.shelf-cover:nth-child(odd)  { transform: rotate(-1deg); }
+.shelf-cover:nth-child(3n)   { transform: rotate(0.8deg) translateY(-3px); }
+
+/* Burning trash can in corner */
+.shelf-trash {
+  position:absolute; bottom:6%; right:7%;
+  width: clamp(70px, 10vw, 110px);
+  filter: drop-shadow(0 0 30px rgba(255,90,0,0.6));
+}
+.shelf-trash svg { width:100%; height:auto; }
+@keyframes flameFlick {
+  0%,100% { transform: scale(1) translateY(0) rotate(-1deg); }
+  50%     { transform: scale(1.06,0.97) translateY(-1px) rotate(1deg); }
+}
+.flame-group { animation: flameFlick 0.45s ease-in-out infinite; transform-origin: 34px 50px; }
+
 .door-scene {
   position: relative; width: 100vw; height: 100vh;
-  perspective: 1100px; perspective-origin: 50% 50%;
+  perspective: 1400px; perspective-origin: 50% 50%;
   display: flex; align-items: center; justify-content: center;
 }
 .door-surround {
   position: absolute;
-  width: min(420px, 88vw); height: min(580px, 88vh);
-  border: 6px solid #6B4C2A;
-  box-shadow: 0 0 0 3px #3a2510, 0 0 40px rgba(180,110,30,0.35), inset 0 0 30px rgba(0,0,0,0.6);
-  background: #1a0d05;
+  width: min(480px, 90vw); height: min(640px, 90vh);
+  border: 8px solid #2a160a;
+  box-shadow:
+    0 0 0 4px #1a0c05,
+    0 0 0 6px #4a2e1a,
+    0 0 60px rgba(180,110,30,0.45),
+    inset 0 0 40px rgba(0,0,0,0.7);
+  background: #0a0503;
   display: flex; overflow: hidden;
+  transform-style: preserve-3d;
+}
+/* ornate header carving above the door surround */
+.door-surround::before {
+  content:''; position:absolute; top:-26px; left:-8px; right:-8px; height:24px;
+  background:
+    radial-gradient(ellipse at center, #5a3a1e 0%, #2a160a 80%),
+    linear-gradient(180deg, #6B4220 0%, #2a160a 100%);
+  border:2px solid #1a0c05; border-bottom:none;
+  box-shadow: 0 -2px 8px rgba(0,0,0,0.6);
 }
 .door {
   width: 50%; height: 100%; position: relative;
   transform-style: preserve-3d;
-  transition: transform 1.6s cubic-bezier(0.4, 0, 0.2, 1);
-  background: linear-gradient(135deg, #7B5230 0%, #5C3A1E 40%, #7B5230 70%, #4A2E14 100%);
+  transition: transform 1.8s cubic-bezier(0.55, 0.1, 0.3, 0.95);
+  background:
+    repeating-linear-gradient(91deg,
+      rgba(0,0,0,0)        0px,
+      rgba(0,0,0,0)        14px,
+      rgba(20,8,2,0.55)    14px,
+      rgba(20,8,2,0.55)    15px,
+      rgba(0,0,0,0)        15px,
+      rgba(0,0,0,0)        38px,
+      rgba(60,30,10,0.30)  38px,
+      rgba(60,30,10,0.30)  39px),
+    repeating-linear-gradient(89deg,
+      rgba(0,0,0,0)        0px,
+      rgba(0,0,0,0)        80px,
+      rgba(0,0,0,0.18)     80px,
+      rgba(0,0,0,0.18)     82px),
+    linear-gradient(178deg, #4a2c12 0%, #3a200e 30%, #5a3418 55%, #2e1808 80%, #4a2c12 100%);
+  background-blend-mode: multiply, normal, normal;
   overflow: hidden;
+  box-shadow: inset 0 0 60px rgba(0,0,0,0.7), inset 0 0 12px rgba(20,8,2,0.9);
 }
-.door-left  { transform-origin: left center; border-right: 2px solid #3a2510; }
-.door-right { transform-origin: right center; border-left: 2px solid #3a2510; }
-.door-left.open  { transform: rotateY(-115deg); }
-.door-right.open { transform: rotateY(115deg); }
+.door-left  { transform-origin: left center; border-right: 2px solid #1a0c05; }
+.door-right { transform-origin: right center; border-left: 2px solid #1a0c05; }
+.door-left.open  { transform: rotateY(-118deg); box-shadow: inset 0 0 60px rgba(0,0,0,0.7), -10px 0 30px rgba(0,0,0,0.6); }
+.door-right.open { transform: rotateY(118deg);  box-shadow: inset 0 0 60px rgba(0,0,0,0.7),  10px 0 30px rgba(0,0,0,0.6); }
 
+/* Recessed wooden panels with ornate beveled frames */
 .door-panel {
-  position: absolute; border: 3px solid rgba(255,200,100,0.18);
-  box-shadow: inset 0 0 8px rgba(0,0,0,0.4);
+  position: absolute;
+  background:
+    linear-gradient(135deg, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0) 50%),
+    linear-gradient(180deg, #2a1606 0%, #4a2812 50%, #2a1606 100%);
+  border: 2px solid #150804;
+  box-shadow:
+    inset 0 0 12px rgba(0,0,0,0.7),
+    inset 2px 2px 0 rgba(120,70,30,0.25),
+    inset -2px -2px 0 rgba(0,0,0,0.5);
 }
-.door-panel-top    { top:8%; left:10%; right:10%; height:35%; }
-.door-panel-bottom { top:50%; left:10%; right:10%; height:42%; }
+.door-panel-top    { top:6%;  left:12%; right:12%; height:33%; }
+.door-panel-bottom { top:48%; left:12%; right:12%; height:46%; }
+.door-panel::before {
+  content:''; position:absolute; inset:8px;
+  border:1px solid rgba(180,120,60,0.18);
+  border-radius:1px;
+}
+/* decorative carved diamond in center of each panel */
+.door-panel::after {
+  content:''; position:absolute; left:50%; top:50%; width:18px; height:18px;
+  transform: translate(-50%,-50%) rotate(45deg);
+  background: linear-gradient(135deg, #6B4220 0%, #2a160a 100%);
+  box-shadow: 0 0 4px rgba(0,0,0,0.5), inset 0 0 4px rgba(0,0,0,0.6);
+  border:1px solid #1a0c05;
+}
+
+/* Brass nail studs along door edges */
+.door-studs {
+  position:absolute; top:8px; bottom:8px; width:10px;
+  display:flex; flex-direction:column; justify-content:space-around;
+}
+.door-left  .door-studs { left:6px; }
+.door-right .door-studs { right:6px; }
+.door-stud {
+  width:8px; height:8px; border-radius:50%;
+  background: radial-gradient(circle at 30% 30%, #d4a040 0%, #8b5a14 60%, #4a2c08 100%);
+  box-shadow: 0 1px 1px rgba(0,0,0,0.6);
+}
+
+/* Cracks and weathering */
+.door-crack {
+  position:absolute; background: rgba(0,0,0,0.4); pointer-events:none;
+}
+.door-crack.c1 { left:25%; top:5%; width:1px; height:18%; transform: rotate(2deg); }
+.door-crack.c2 { left:65%; top:20%; width:1px; height:14%; transform: rotate(-3deg); }
 
 .door-grain {
-  position: absolute; inset: 0; opacity: 0.08;
-  background: repeating-linear-gradient(90deg, transparent, transparent 3px, rgba(255,255,255,0.6) 3px, rgba(255,255,255,0.6) 4px);
+  position: absolute; inset: 0; opacity: 0.18; pointer-events:none;
+  background:
+    repeating-linear-gradient(89deg,
+      transparent 0,
+      transparent 7px,
+      rgba(0,0,0,0.5) 7px,
+      rgba(0,0,0,0.5) 8px);
 }
-.door-handle-l { position: absolute; top: 50%; right: 14%; transform: translateY(-50%); }
-.door-handle-r { position: absolute; top: 50%; left:  14%; transform: translateY(-50%); }
-.door-handle-l svg, .door-handle-r svg { display: block; }
+
+/* Brass handles & ring pulls */
+.door-handle-l { position: absolute; top: 50%; right: 10%; transform: translateY(-50%); }
+.door-handle-r { position: absolute; top: 50%; left:  10%; transform: translateY(-50%); }
+.door-handle-l svg, .door-handle-r svg { display: block; filter: drop-shadow(2px 2px 3px rgba(0,0,0,0.6)); }
 
 .door-glow {
   position: absolute; inset: 0; pointer-events: none;
-  background: radial-gradient(ellipse at center, rgba(220,160,50,0.08) 0%, transparent 70%);
+  background: radial-gradient(ellipse at center, rgba(220,160,50,0.05) 0%, transparent 60%);
 }
 
 .door-title {
-  position: absolute; bottom: -3rem; left: 50%; transform: translateX(-50%);
-  font-family: 'Playfair Display', Georgia, serif; font-size: clamp(1rem, 2.5vw, 1.4rem);
-  color: rgba(245,230,200,0.55); letter-spacing: 0.25em; text-transform: uppercase;
-  white-space: nowrap;
+  position: absolute; bottom: -3.2rem; left: 50%; transform: translateX(-50%);
+  font-family: 'Playfair Display', Georgia, serif; font-size: clamp(0.85rem, 2vw, 1.2rem);
+  color: rgba(245,230,200,0.55); letter-spacing: 0.3em; text-transform: uppercase;
+  white-space: nowrap; text-shadow: 0 1px 4px rgba(0,0,0,0.8);
 }
 
-/* warm light behind the doors */
+/* warm light bleeding from gaps */
 .door-light {
   position: absolute; inset: 0; z-index: -1;
-  background: radial-gradient(ellipse at center, #3D1F00 0%, #0a0503 65%);
+  background: radial-gradient(ellipse at center, #3D1F00 0%, #050201 65%);
 }
-
-/* ambient candle flicker on light source */
-@keyframes flicker { 0%,100%{opacity:1} 45%{opacity:0.8} 60%{opacity:0.95} 75%{opacity:0.78} }
+@keyframes flicker { 0%,100%{opacity:1} 45%{opacity:0.85} 60%{opacity:0.97} 75%{opacity:0.82} }
 .door-light { animation: flicker 3s ease-in-out infinite; }
 
 .lc {
@@ -554,34 +677,97 @@ body { background: var(--mahogany); color: var(--ink); font-family: var(--body);
   <button onclick="switchProfile()">Switch</button>
 </div>
 
-<!-- DOOR INTRO -->
+<!-- DOOR INTRO with library shelf behind -->
 <div id="loading">
   <div class="door-light"></div>
+
+  <!-- Bookshelf scene revealed when doors open -->
+  <div class="shelf-scene" id="shelf-scene">
+    <div class="shelf-row r1">
+      <img class="shelf-cover" src="https://covers.openlibrary.org/b/isbn/0345539788-L.jpg" alt="Red Rising">
+      <img class="shelf-cover" src="https://covers.openlibrary.org/b/isbn/0765326353-L.jpg" alt="Stormlight Archive">
+      <img class="shelf-cover" src="https://covers.openlibrary.org/b/isbn/0765311786-L.jpg" alt="Mistborn">
+    </div>
+    <div class="shelf-plank p1"></div>
+    <div class="shelf-row r2">
+      <img class="shelf-cover" src="https://covers.openlibrary.org/b/isbn/0316187747-L.jpg" alt="Riyria Revelations">
+      <img class="shelf-cover" src="https://covers.openlibrary.org/b/isbn/0989671402-L.jpg" alt="Cradle">
+      <img class="shelf-cover" src="https://covers.openlibrary.org/b/isbn/0316274100-L.jpg" alt="Licanius Trilogy">
+    </div>
+    <div class="shelf-plank p2"></div>
+
+    <!-- Burning romantasy in the corner trash can -->
+    <div class="shelf-trash">
+      <svg viewBox="0 0 68 110" xmlns="http://www.w3.org/2000/svg">
+        <ellipse cx="34" cy="62" rx="26" ry="14" fill="#ff5500" opacity="0.55"/>
+        <g class="flame-group">
+          <path d="M34 60 Q24 46 28 26 Q31 12 34 4 Q37 12 40 26 Q44 46 34 60Z" fill="#FF4400" opacity="0.92"/>
+          <path d="M34 58 Q27 48 30 32 Q32 22 34 16 Q36 22 38 32 Q41 48 34 58Z" fill="#FF8800" opacity="0.94"/>
+          <path d="M34 56 Q29 49 31 38 Q32.5 30 34 26 Q35.5 30 37 38 Q39 49 34 56Z" fill="#FFCC00" opacity="0.92"/>
+          <path d="M34 53 Q31.5 49 32.5 42 Q33.5 37 34 35 Q34.5 37 35.5 42 Q36.5 49 34 53Z" fill="#FFFFFF" opacity="0.85"/>
+        </g>
+        <!-- burning book -->
+        <rect x="26" y="48" width="16" height="22" rx="0.8" fill="#6A0D0D" stroke="#3a0000" stroke-width="0.8"/>
+        <rect x="40" y="49" width="2" height="20" rx="0.4" fill="#F5E6C8" opacity="0.65"/>
+        <text font-family="Georgia,serif" font-size="2.6" fill="#FFCCA0" opacity="0.85" letter-spacing="0.4" transform="translate(34,60) rotate(-90)">ROMANTASY</text>
+        <!-- trash can -->
+        <rect x="29" y="68" width="10" height="4" rx="1" fill="#3A2A18" stroke="#28180A" stroke-width="0.9"/>
+        <rect x="9"  y="72" width="50" height="6" rx="1.5" fill="#4A3828" stroke="#2E1E0E" stroke-width="1.1"/>
+        <rect x="13" y="78" width="42" height="30" rx="1.5" fill="#5A4030" stroke="#3A2A18" stroke-width="1.1"/>
+        <line x1="24" y1="78" x2="24" y2="108" stroke="#3A2A18" stroke-width="0.6" opacity="0.55"/>
+        <line x1="34" y1="78" x2="34" y2="108" stroke="#3A2A18" stroke-width="0.6" opacity="0.55"/>
+        <line x1="44" y1="78" x2="44" y2="108" stroke="#3A2A18" stroke-width="0.6" opacity="0.55"/>
+        <rect x="15" y="106" width="8" height="4" rx="1" fill="#3A2A18"/>
+        <rect x="45" y="106" width="8" height="4" rx="1" fill="#3A2A18"/>
+      </svg>
+    </div>
+  </div>
+
   <div class="door-scene">
     <div class="door-surround" id="door-surround">
       <!-- Left door -->
       <div class="door door-left" id="door-left">
         <div class="door-grain"></div>
+        <div class="door-crack c1"></div>
+        <div class="door-crack c2"></div>
         <div class="door-panel door-panel-top"></div>
         <div class="door-panel door-panel-bottom"></div>
+        <div class="door-studs">
+          <div class="door-stud"></div><div class="door-stud"></div><div class="door-stud"></div>
+          <div class="door-stud"></div><div class="door-stud"></div><div class="door-stud"></div>
+          <div class="door-stud"></div><div class="door-stud"></div>
+        </div>
         <div class="door-glow"></div>
         <div class="door-handle-l">
-          <svg width="12" height="36" viewBox="0 0 12 36">
-            <rect x="4" y="0" width="4" height="36" rx="2" fill="#C8942A"/>
-            <circle cx="6" cy="6" r="5" fill="#D4A840" stroke="#9B6E1A" stroke-width="1"/>
+          <svg width="20" height="56" viewBox="0 0 20 56">
+            <rect x="7" y="16" width="6" height="40" rx="2" fill="#8B5A1A"/>
+            <ellipse cx="10" cy="14" rx="9" ry="4" fill="#D4A030" stroke="#5a3210" stroke-width="0.8"/>
+            <ellipse cx="10" cy="12" rx="6" ry="2" fill="#f0c060" opacity="0.7"/>
+            <circle cx="10" cy="22" r="3" fill="#8B5A1A" stroke="#3a1f08" stroke-width="0.6"/>
+            <circle cx="10" cy="22" r="1" fill="#1a0c05"/>
           </svg>
         </div>
       </div>
       <!-- Right door -->
       <div class="door door-right" id="door-right">
         <div class="door-grain"></div>
+        <div class="door-crack c1"></div>
+        <div class="door-crack c2"></div>
         <div class="door-panel door-panel-top"></div>
         <div class="door-panel door-panel-bottom"></div>
+        <div class="door-studs">
+          <div class="door-stud"></div><div class="door-stud"></div><div class="door-stud"></div>
+          <div class="door-stud"></div><div class="door-stud"></div><div class="door-stud"></div>
+          <div class="door-stud"></div><div class="door-stud"></div>
+        </div>
         <div class="door-glow"></div>
         <div class="door-handle-r">
-          <svg width="12" height="36" viewBox="0 0 12 36">
-            <rect x="4" y="0" width="4" height="36" rx="2" fill="#C8942A"/>
-            <circle cx="6" cy="6" r="5" fill="#D4A840" stroke="#9B6E1A" stroke-width="1"/>
+          <svg width="20" height="56" viewBox="0 0 20 56">
+            <rect x="7" y="16" width="6" height="40" rx="2" fill="#8B5A1A"/>
+            <ellipse cx="10" cy="14" rx="9" ry="4" fill="#D4A030" stroke="#5a3210" stroke-width="0.8"/>
+            <ellipse cx="10" cy="12" rx="6" ry="2" fill="#f0c060" opacity="0.7"/>
+            <circle cx="10" cy="22" r="3" fill="#8B5A1A" stroke="#3a1f08" stroke-width="0.6"/>
+            <circle cx="10" cy="22" r="1" fill="#1a0c05"/>
           </svg>
         </div>
       </div>
@@ -910,21 +1096,27 @@ window.addEventListener('DOMContentLoaded', () => {
   document.getElementById('ps-name-input').addEventListener('keydown', e => {
     if (e.key === 'Enter') createProfile();
   });
-  showProfileScreen();
-});
 
-function startLoading() {
-  // Swing doors open after a brief pause
+  // Doors open automatically after 3 seconds
   setTimeout(() => {
     document.getElementById('door-left').classList.add('open');
     document.getElementById('door-right').classList.add('open');
-  }, 600);
-  // After doors are open, fade out and show app
+  }, 3000);
+
+  // After doors open and shelf is visible, fade to profile screen
   setTimeout(() => {
     document.getElementById('loading').classList.add('fade-out');
-    document.getElementById('app').style.display = 'block';
-    setTimeout(() => { document.getElementById('loading').style.display = 'none'; }, 1200);
-  }, 2400);
+    showProfileScreen();
+    setTimeout(() => {
+      document.getElementById('loading').style.display = 'none';
+    }, 1300);
+  }, 5400);
+});
+
+function startLoading() {
+  // Door intro already played at page load — just show the app
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
 }
 
 // ── KEY SCREEN ─────────────────────────────────────────────
@@ -946,7 +1138,6 @@ function saveKey() {
   document.getElementById('key-err').textContent = '';
 
   if (document.getElementById('app').style.display !== 'block') {
-    document.getElementById('loading').style.display = 'flex';
     startLoading();
   } else {
     consultOracle();
