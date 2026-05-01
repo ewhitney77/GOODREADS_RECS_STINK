@@ -1049,11 +1049,22 @@ body {
 <!-- ============================================================
      JAVASCRIPT
 ============================================================ -->
+<!-- config.js is gitignored — paste your key there, never here -->
+<script src="config.js"></script>
 <script>
-// API key is stored in localStorage — never hardcoded, never committed.
-// getKey() prompts on first use; clearKey() resets it.
-function getKey() { return localStorage.getItem('anthropic_key') || ''; }
-function clearKey() { localStorage.removeItem('anthropic_key'); }
+// Key resolution order:
+//  1. config.js (gitignored file, set window.ANTHROPIC_API_KEY there)
+//  2. localStorage (entered via the in-app modal)
+function getKey() {
+  return (window.ANTHROPIC_API_KEY && window.ANTHROPIC_API_KEY !== 'your-key-here')
+    ? window.ANTHROPIC_API_KEY
+    : (localStorage.getItem('anthropic_key') || '');
+}
+function clearKey() {
+  localStorage.removeItem('anthropic_key');
+  // Also wipe the window value so the modal re-appears
+  window.ANTHROPIC_API_KEY = '';
+}
 
 // ──────────────────────────────────────────────
 // BOOK CATALOGUE
@@ -1277,7 +1288,7 @@ async function consultOracle() {
           'anthropic-dangerous-direct-browser-access': 'true'
         },
         body: JSON.stringify({
-          model: 'claude-3-5-sonnet-20241022',
+          model: 'claude-sonnet-4-5-20250514', // update if you get a 404 — check console.anthropic.com/docs for current IDs
           max_tokens: 2400,
           system,
           messages: [{ role: 'user', content: user }]
