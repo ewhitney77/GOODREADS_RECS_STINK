@@ -1,0 +1,1341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Oracle's Shelf — Fantasy Recommendations</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&display=swap" rel="stylesheet">
+
+<style>
+/* ============================================================
+   RESET & CUSTOM PROPERTIES
+============================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --mahogany:       #2C1A0E;
+  --parchment:      #F5E6C8;
+  --parchment-mid:  #E8D4A8;
+  --parchment-dark: #D9C490;
+  --ink:            #1A1008;
+  --amber:          #D4922A;
+  --amber-light:    #E8AC44;
+  --green:          #2D5016;
+  --red-stamp:      #7A1E1E;
+  --cool-shadow:    #2A2438;
+  --serif:   'Playfair Display', Georgia, 'Times New Roman', serif;
+  --body:    'EB Garamond', Georgia, 'Times New Roman', serif;
+  --mono:    'Courier New', Courier, monospace;
+}
+
+html { font-size: 16px; scroll-behavior: smooth; }
+
+body {
+  background: var(--mahogany);
+  color: var(--ink);
+  font-family: var(--body);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ============================================================
+   LOADING SCREEN
+============================================================ */
+#loading {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: #060302;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  overflow: hidden;
+  transition: opacity 1.1s ease;
+}
+#loading.fade-out { opacity: 0; pointer-events: none; }
+
+/* Shelf background */
+.shelf-bg {
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 112px,
+      rgba(55, 32, 12, 0.55) 112px,
+      rgba(55, 32, 12, 0.55) 120px
+    ),
+    linear-gradient(180deg, #060302 0%, #0f0703 50%, #060302 100%);
+}
+.shelf-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  /* simulated spine silhouettes */
+  background-image: repeating-linear-gradient(
+    90deg,
+    transparent 0, transparent 14px,
+    rgba(30,15,5,0.25) 14px, rgba(30,15,5,0.25) 15px
+  );
+  opacity: 0.6;
+}
+.shelf-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 45%, rgba(70,35,8,0.18) 0%, transparent 65%);
+}
+
+/* Floating book covers */
+.lc {
+  position: absolute;
+  width: 108px;
+  height: 162px;
+  object-fit: cover;
+  border-radius: 2px 4px 4px 2px;
+  box-shadow: 3px 4px 22px rgba(0,0,0,0.92), inset -3px 0 7px rgba(0,0,0,0.5);
+  opacity: 0;
+  animation: coverFlash var(--dur, 4s) ease-in-out var(--delay, 0s) infinite;
+}
+.lc:nth-child(2) { --delay:0s;   --dur:4.1s; top:12%;    left:10%;  }
+.lc:nth-child(3) { --delay:0.9s; --dur:3.8s; top:16%;    right:11%; }
+.lc:nth-child(4) { --delay:1.8s; --dur:4.4s; top:35%;    left:40%;  transform-origin: center; }
+.lc:nth-child(5) { --delay:2.7s; --dur:4.0s; bottom:20%; right:16%; }
+.lc:nth-child(6) { --delay:3.5s; --dur:3.7s; bottom:16%; left:17%;  }
+
+@keyframes coverFlash {
+  0%   { opacity:0;    transform: scale(0.87) rotate(-3deg);  }
+  10%  { opacity:0.80; transform: scale(1.0)  rotate(0deg);   }
+  38%  { opacity:0.88; transform: scale(1.02) rotate(1.2deg); }
+  70%  { opacity:0.50; transform: scale(1.0)  rotate(-0.6deg);}
+  88%  { opacity:0.12; transform: scale(0.93) rotate(-2deg);  }
+  100% { opacity:0;    transform: scale(0.87) rotate(-3deg);  }
+}
+
+/* Loading text */
+#loading-text {
+  position: relative;
+  z-index: 10;
+  font-family: var(--serif);
+  font-size: 1.2rem;
+  font-style: italic;
+  color: var(--parchment);
+  letter-spacing: 0.22em;
+  animation: breathe 2.3s ease-in-out infinite;
+}
+#loading-text::after {
+  content: '';
+  display: block;
+  width: 48px;
+  height: 1px;
+  background: var(--amber);
+  margin: 10px auto 0;
+  opacity: 0.45;
+}
+@keyframes breathe {
+  0%,100% { opacity: 0.3; }
+  50%     { opacity: 0.95; }
+}
+
+/* ============================================================
+   TRASH-CAN BURNING ROMANTASY BOOK
+============================================================ */
+.trash-scene {
+  position: absolute;
+  bottom: 26px;
+  right: 34px;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.trash-caption {
+  font-family: var(--body);
+  font-style: italic;
+  font-size: 0.58rem;
+  color: rgba(212,146,42,0.42);
+  letter-spacing: 0.08em;
+  margin-top: 5px;
+}
+.trash-svg { width: 68px; height: 96px; overflow: visible; }
+
+/* Flame animations */
+.fl-outer {
+  animation: flo 0.64s ease-in-out infinite alternate;
+  transform-origin: 34px 50px;
+}
+.fl-mid {
+  animation: flm 0.50s ease-in-out infinite alternate-reverse;
+  transform-origin: 34px 53px;
+}
+.fl-inner {
+  animation: fli 0.40s ease-in-out infinite alternate;
+  transform-origin: 34px 55px;
+}
+.fl-core {
+  animation: flc 0.30s ease-in-out infinite alternate-reverse;
+  transform-origin: 34px 57px;
+}
+.can-glow { animation: glp 1.1s ease-in-out infinite alternate; }
+
+@keyframes flo  { 0%{transform:scaleY(1.0) scaleX(1.0);opacity:.87} 100%{transform:scaleY(1.15) scaleX(0.91);opacity:1} }
+@keyframes flm  { 0%{transform:scaleY(1.0) scaleX(1.0) rotate(-2deg);opacity:.9} 100%{transform:scaleY(1.12) scaleX(0.90) rotate(3deg);opacity:1} }
+@keyframes fli  { 0%{transform:scaleY(0.94) rotate(2.5deg);opacity:.84} 100%{transform:scaleY(1.14) rotate(-2.5deg);opacity:1} }
+@keyframes flc  { 0%{transform:scaleY(1.0);opacity:.88} 100%{transform:scaleY(1.22);opacity:1} }
+@keyframes glp  { 0%{opacity:.10} 100%{opacity:.30} }
+
+/* ============================================================
+   MAIN APP
+============================================================ */
+#app {
+  display: none;
+  min-height: 100vh;
+  background: var(--parchment);
+  position: relative;
+  animation: appReveal 0.9s ease forwards;
+}
+@keyframes appReveal { from{opacity:0} to{opacity:1} }
+
+/* Grain texture overlay */
+#app::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9997;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.78' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23g)' opacity='1'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 220px 220px;
+  opacity: 0.026;
+  mix-blend-mode: multiply;
+}
+/* Vignette */
+#app::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9996;
+  background: radial-gradient(ellipse at 50% 38%, transparent 50%, rgba(44,26,14,0.40) 100%);
+}
+
+/* ============================================================
+   HEADER
+============================================================ */
+.app-header {
+  background: var(--mahogany);
+  padding: 3rem 2rem 2.5rem;
+  text-align: center;
+  position: relative;
+}
+.app-header::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent 0%, var(--amber) 25%, var(--amber) 75%, transparent 100%);
+  opacity: 0.55;
+}
+.app-title {
+  font-family: var(--serif);
+  font-size: clamp(2rem, 5vw, 3.1rem);
+  font-weight: 700;
+  color: var(--parchment);
+  letter-spacing: 0.04em;
+  line-height: 1.15;
+}
+.app-tagline {
+  font-family: var(--body);
+  font-style: italic;
+  font-size: 1.05rem;
+  color: var(--amber);
+  margin-top: 0.6rem;
+  opacity: 0.8;
+  letter-spacing: 0.05em;
+}
+
+/* ============================================================
+   LAYOUT
+============================================================ */
+.wrap { max-width: 1180px; margin: 0 auto; padding: 0 2rem; }
+
+/* Ornate divider */
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  margin: 3rem 0 2.5rem;
+}
+.divider-line {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--amber), var(--mahogany));
+}
+.divider-line.r { background: linear-gradient(90deg, var(--mahogany), var(--amber), transparent); }
+.divider-glyph {
+  font-family: var(--serif);
+  color: var(--amber);
+  font-size: 1.05rem;
+  opacity: 0.68;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+/* Section heading */
+.sec-head { text-align: center; margin-bottom: 2rem; }
+.sec-head h2 {
+  font-family: var(--serif);
+  font-size: clamp(1.55rem, 3.5vw, 2.15rem);
+  font-weight: 600;
+  color: var(--mahogany);
+  letter-spacing: 0.02em;
+}
+.sec-head .sub {
+  font-family: var(--body);
+  font-style: italic;
+  font-size: 0.98rem;
+  color: rgba(44,26,14,0.56);
+  margin-top: 0.4rem;
+}
+
+/* Count badge */
+.count-wrap { text-align: center; margin-bottom: 1.5rem; }
+.count-badge {
+  display: inline-block;
+  font-family: var(--serif);
+  font-size: 0.88rem;
+  background: var(--mahogany);
+  color: var(--parchment);
+  padding: 0.28rem 1.1rem;
+  letter-spacing: 0.05em;
+}
+.count-badge .n { color: var(--amber); font-weight: 700; }
+
+/* Search */
+.search-wrap { position: relative; max-width: 370px; margin: 0 auto 1.8rem; }
+.search-icon {
+  position: absolute;
+  left: 0.75rem; top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.9rem;
+  opacity: 0.38;
+  pointer-events: none;
+}
+.search-input {
+  width: 100%;
+  padding: 0.62rem 1rem 0.62rem 2.3rem;
+  background: rgba(44,26,14,0.05);
+  border: none;
+  border-bottom: 2px solid rgba(44,26,14,0.22);
+  font-family: var(--body);
+  font-size: 0.95rem;
+  color: var(--ink);
+  outline: none;
+  transition: border-color 0.2s, background 0.2s;
+}
+.search-input:focus { border-bottom-color: var(--amber); background: rgba(44,26,14,0.03); }
+.search-input::placeholder { opacity: 0.38; font-style: italic; }
+
+/* ============================================================
+   BOOK GRID
+============================================================ */
+.book-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(106px, 1fr));
+  gap: 1.05rem 0.85rem;
+  margin-bottom: 1.2rem;
+}
+
+.book-item {
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.38rem;
+  transition: transform 0.14s ease;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.book-item:hover { transform: translateY(-3px); }
+
+.cover-wrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  background: var(--mahogany);
+  border-radius: 1px 3px 3px 1px;
+  overflow: hidden;
+  box-shadow: 1px 1px 4px rgba(0,0,0,0.12), inset -2px 0 5px rgba(0,0,0,0.18);
+  transition: outline 0.12s, box-shadow 0.14s;
+}
+/* Spine shadow */
+.cover-wrap::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 5px;
+  background: linear-gradient(90deg, rgba(0,0,0,0.3), rgba(0,0,0,0.03));
+  z-index: 2;
+  pointer-events: none;
+}
+/* Selected ring */
+.book-item.selected .cover-wrap { outline: 2.5px solid var(--amber); outline-offset: 1px; }
+/* Selected tint */
+.book-item.selected .cover-wrap::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(212,146,42,0.17);
+  z-index: 3;
+  pointer-events: none;
+}
+/* Checkmark */
+.chk {
+  display: none;
+  position: absolute;
+  top: 4px; right: 4px;
+  width: 18px; height: 18px;
+  background: var(--amber);
+  border-radius: 50%;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.52rem;
+  color: #fff;
+  font-weight: 700;
+  z-index: 5;
+}
+.book-item.selected .chk { display: flex; }
+
+.cover-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.cover-ph {
+  display: none;
+  width: 100%; height: 100%;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+  background: linear-gradient(145deg, #3d2614 0%, #2C1A0E 100%);
+  text-align: center;
+}
+.cover-ph .pht { font-family: var(--serif); font-size: 0.5rem; color: var(--parchment); line-height: 1.35; opacity: 0.92; }
+.cover-ph .pha { font-family: var(--body); font-style: italic; font-size: 0.42rem; color: var(--amber); margin-top: 0.25rem; opacity: 0.72; }
+
+.book-lbl  { font-family: var(--serif); font-size: 0.58rem; color: var(--mahogany); text-align: center; line-height: 1.3; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.book-auth { font-family: var(--body); font-style: italic; font-size: 0.54rem; color: rgba(44,26,14,0.52); text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+
+/* ============================================================
+   REJECTED SHELF ZONE
+============================================================ */
+.rejected-zone {
+  background: linear-gradient(180deg, #ddd0b0 0%, #cfc0a0 100%);
+  border-top: 2px solid rgba(42,36,56,0.12);
+  border-bottom: 2px solid rgba(42,36,56,0.12);
+  padding: 2.5rem 2rem;
+  margin: 0 -2rem;
+}
+.rejected-zone .count-badge { background: var(--cool-shadow); }
+.rejected-zone .search-input { border-bottom-color: rgba(42,36,56,0.22); }
+.rejected-zone .search-input:focus { border-bottom-color: #6655aa; }
+
+/* ============================================================
+   MANUAL ENTRY CARD
+============================================================ */
+.manual-card {
+  position: relative;
+  background: #f3e5c0;
+  border: 1px solid rgba(44,26,14,0.13);
+  padding: 1.8rem 2rem 1.6rem;
+  max-width: 570px;
+  margin: 2.2rem auto 0;
+  transform: rotate(-0.22deg);
+}
+/* Pin shadow */
+.manual-card::before {
+  content: '';
+  position: absolute;
+  top: -5px; left: 50%;
+  transform: translateX(-50%);
+  width: 26px; height: 9px;
+  background: rgba(110,75,35,0.32);
+  border-radius: 1px 1px 3px 3px;
+}
+.manual-card-title {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 0.88rem;
+  color: rgba(44,26,14,0.62);
+  text-align: center;
+  margin-bottom: 1.4rem;
+  letter-spacing: 0.04em;
+}
+.mfield { margin-bottom: 1.3rem; }
+.mfield:last-child { margin-bottom: 0; }
+.mlabel {
+  display: flex;
+  align-items: center;
+  gap: 0.42rem;
+  font-family: var(--serif);
+  font-size: 0.79rem;
+  color: var(--mahogany);
+  margin-bottom: 0.38rem;
+  letter-spacing: 0.02em;
+}
+.quill { font-size: 0.9rem; opacity: 0.5; flex-shrink: 0; }
+.minput {
+  width: 100%;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid rgba(44,26,14,0.26);
+  padding: 0.28rem 0 0.22rem;
+  font-family: var(--body);
+  font-style: italic;
+  font-size: 0.92rem;
+  color: var(--ink);
+  outline: none;
+  line-height: 2;
+  /* ruled lines */
+  background-image: repeating-linear-gradient(
+    0deg,
+    transparent, transparent calc(2em - 1px),
+    rgba(44,26,14,0.09) calc(2em - 1px),
+    rgba(44,26,14,0.09) 2em
+  );
+  background-size: 100% 2em;
+  transition: border-bottom-color 0.2s;
+}
+.minput::placeholder { opacity: 0.32; }
+.minput:focus { border-bottom-color: var(--amber); }
+
+/* ============================================================
+   ORACLE SECTION
+============================================================ */
+.oracle-zone { text-align: center; padding: 3.5rem 0 3rem; }
+
+.oracle-btn {
+  display: inline-block;
+  position: relative;
+  font-family: var(--serif);
+  font-size: 1.22rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  color: var(--parchment);
+  background: var(--mahogany);
+  border: 2px solid var(--amber);
+  padding: 1.1rem 3.2rem;
+  cursor: pointer;
+  transition: background 0.18s, transform 0.14s, box-shadow 0.18s;
+  outline: none;
+}
+.oracle-btn::before,
+.oracle-btn::after {
+  content: '✦';
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--amber);
+  font-size: 0.82rem;
+  opacity: 0.62;
+}
+.oracle-btn::before { left: 1.1rem; }
+.oracle-btn::after  { right: 1.1rem; }
+.oracle-btn:not(:disabled):hover { background: #3d2614; transform: translateY(-2px); box-shadow: 0 6px 24px rgba(212,146,42,0.17); }
+.oracle-btn:not(:disabled):active { transform: translateY(0); }
+.oracle-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.oracle-hint {
+  font-family: var(--body);
+  font-style: italic;
+  font-size: 0.8rem;
+  color: rgba(44,26,14,0.42);
+  margin-top: 0.75rem;
+  min-height: 1.2em;
+}
+
+/* ============================================================
+   LOADING (CANDLE)
+============================================================ */
+.oracle-loading {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.35rem;
+  padding: 2.5rem 0;
+}
+.oracle-loading.active { display: flex; }
+
+.candle-svg { width: 52px; height: 78px; overflow: visible; }
+.candle-flame-g {
+  animation: candleFlicker 0.88s ease-in-out infinite alternate;
+  transform-origin: 26px 22px;
+}
+@keyframes candleFlicker {
+  0%   { transform: scaleY(1.0)  scaleX(1.0)  rotate(-1.5deg); opacity: 0.9; }
+  28%  { transform: scaleY(1.13) scaleX(0.90) rotate(2.2deg);  opacity: 1.0; }
+  64%  { transform: scaleY(0.93) scaleX(1.07) rotate(-2deg);   opacity: 0.87; }
+  100% { transform: scaleY(1.07) scaleX(0.95) rotate(1deg);    opacity: 0.95; }
+}
+.oracle-loading-text {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 1.05rem;
+  color: var(--mahogany);
+  animation: breathe 1.9s ease-in-out infinite;
+}
+
+/* ============================================================
+   ERROR STATE
+============================================================ */
+.oracle-error {
+  display: none;
+  text-align: center;
+  max-width: 460px;
+  margin: 0 auto;
+  padding: 2rem;
+  background: rgba(44,26,14,0.04);
+  border: 1px solid rgba(44,26,14,0.13);
+}
+.oracle-error.active { display: block; }
+.oracle-error p { font-family: var(--body); font-style: italic; color: var(--mahogany); font-size: 1rem; margin-bottom: 1rem; }
+
+/* ============================================================
+   RESULTS
+============================================================ */
+#results { padding-bottom: 4rem; }
+
+.results-head { text-align: center; padding: 3rem 0 2rem; }
+.results-head h2 { font-family: var(--serif); font-size: clamp(1.65rem, 3.5vw, 2.2rem); font-weight: 700; color: var(--mahogany); }
+.results-head p { font-family: var(--body); font-style: italic; color: rgba(44,26,14,0.52); margin-top: 0.5rem; font-size: 1rem; }
+
+/* Catalog stack */
+.catalog-stack {
+  max-width: 840px;
+  margin: 0 auto;
+  padding: 0 1rem 2rem;
+}
+
+.ccard {
+  position: relative;
+  background: #faf4e1;
+  border: 1px solid rgba(44,26,14,0.17);
+  padding: 1.6rem 2rem 1.4rem 2.5rem;
+  margin-bottom: 1.4rem;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+.ccard:nth-child(odd)  { transform: rotate(-0.38deg); }
+.ccard:nth-child(even) { transform: rotate(0.28deg); }
+.ccard:nth-child(3n)   { transform: rotate(-0.18deg) translateX(2px); }
+.ccard:nth-child(3n+2) { transform: rotate(0.32deg) translateX(-1px); }
+.ccard:hover { transform: rotate(0deg) translateY(-2px) !important; box-shadow: 0 3px 18px rgba(44,26,14,0.10); z-index: 2; }
+
+/* Ruled lines */
+.ccard::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(transparent 0px, transparent 27px, rgba(44,26,14,0.05) 27px, rgba(44,26,14,0.05) 28px);
+  pointer-events: none;
+}
+/* Red margin rule */
+.ccard::after {
+  content: '';
+  position: absolute;
+  left: 48px; top: 0; bottom: 0;
+  width: 1px;
+  background: rgba(155,45,45,0.18);
+  pointer-events: none;
+}
+
+.card-num {
+  position: absolute;
+  top: 0.45rem; left: 0.55rem;
+  font-family: var(--mono);
+  font-size: 0.56rem;
+  color: rgba(44,26,14,0.28);
+  letter-spacing: 0.04em;
+}
+
+.card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+.card-meta { flex: 1; min-width: 0; }
+.card-title  { font-family: var(--mono); font-size: 1.0rem; font-weight: 700; color: var(--ink); letter-spacing: 0.04em; line-height: 1.25; }
+.card-author { font-family: var(--mono); font-size: 0.77rem; color: rgba(26,16,8,0.62); margin-top: 0.17rem; letter-spacing: 0.03em; }
+.card-vols   { font-family: var(--mono); font-size: 0.7rem; color: rgba(26,16,8,0.44); margin-top: 0.1rem; letter-spacing: 0.04em; }
+
+.stamp {
+  font-family: var(--mono);
+  font-size: 0.57rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  padding: 0.2rem 0.46rem;
+  border: 2px solid;
+  flex-shrink: 0;
+  transform: rotate(7deg);
+  margin-top: 0.2rem;
+  opacity: 0.78;
+}
+.stamp-c { color: var(--green);     border-color: var(--green); }
+.stamp-o { color: var(--red-stamp); border-color: var(--red-stamp); }
+
+.card-desc {
+  font-family: var(--body);
+  font-style: italic;
+  font-size: 0.95rem;
+  color: var(--ink);
+  line-height: 1.55;
+  margin-bottom: 0.58rem;
+}
+.card-why {
+  font-family: var(--body);
+  font-size: 0.84rem;
+  color: rgba(26,16,8,0.50);
+  line-height: 1.45;
+  margin-bottom: 0.52rem;
+}
+.why-label {
+  font-family: var(--serif);
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: rgba(44,26,14,0.38);
+  display: block;
+  margin-bottom: 0.15rem;
+}
+.card-genre {
+  display: inline-block;
+  font-family: var(--body);
+  font-style: italic;
+  font-size: 0.77rem;
+  color: rgba(44,26,14,0.55);
+  border-bottom: 1px solid rgba(44,26,14,0.2);
+  padding-bottom: 1px;
+}
+.card-genre::before { content: '⟨ '; opacity: 0.45; }
+.card-genre::after  { content: ' ⟩'; opacity: 0.45; }
+
+/* Another round */
+.another-round { text-align: center; padding: 1.5rem 0 3rem; }
+.round-btn {
+  font-family: var(--serif);
+  font-size: 0.93rem;
+  letter-spacing: 0.07em;
+  color: var(--mahogany);
+  background: transparent;
+  border: 1px solid rgba(44,26,14,0.28);
+  padding: 0.68rem 2.1rem;
+  cursor: pointer;
+  transition: background 0.18s, color 0.18s, border-color 0.18s;
+  outline: none;
+}
+.round-btn:hover { background: var(--mahogany); color: var(--parchment); border-color: var(--mahogany); }
+
+/* ============================================================
+   UTILITY
+============================================================ */
+.hidden { display: none !important; }
+
+/* ============================================================
+   RESPONSIVE
+============================================================ */
+@media (max-width: 640px) {
+  .app-title { font-size: 1.8rem; }
+  .wrap { padding: 0 1rem; }
+  .book-grid { grid-template-columns: repeat(auto-fill, minmax(86px, 1fr)); gap: 0.75rem 0.55rem; }
+  .ccard { padding: 1.15rem 1.2rem 1.1rem 1.5rem; }
+  .ccard::after { left: 30px; }
+  .card-num { display: none; }
+  .oracle-btn { font-size: 1rem; padding: 0.92rem 2rem; }
+  .rejected-zone { margin: 0 -1rem; padding-left: 1rem; padding-right: 1rem; }
+  .manual-card { margin: 1.5rem 0 0; }
+}
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     LOADING SCREEN
+============================================================ -->
+<div id="loading">
+  <div class="shelf-bg"></div>
+
+  <!-- Book cover flashes -->
+  <img class="lc" src="https://covers.openlibrary.org/b/isbn/0765326353-L.jpg" alt="The Way of Kings">
+  <img class="lc" src="https://covers.openlibrary.org/b/isbn/0765311785-L.jpg" alt="Mistborn">
+  <img class="lc" src="https://covers.openlibrary.org/b/isbn/0765360039-L.jpg" alt="Warbreaker">
+  <img class="lc" src="https://covers.openlibrary.org/b/isbn/0765326388-L.jpg" alt="Rhythm of War">
+  <img class="lc" src="https://covers.openlibrary.org/b/isbn/034553980X-L.jpg" alt="Red Rising">
+
+  <!-- Loading label -->
+  <span id="loading-text">Consulting the stacks&hellip;</span>
+
+  <!-- Burning romantasy trash can -->
+  <div class="trash-scene">
+    <svg class="trash-svg" viewBox="0 0 68 96" xmlns="http://www.w3.org/2000/svg">
+      <!-- Glow -->
+      <ellipse class="can-glow" cx="34" cy="50" rx="20" ry="13" fill="#ff5500"/>
+
+      <!-- Flames -->
+      <path class="fl-outer"
+            d="M34 50 Q27 41 29 28 Q31 18 34 13 Q37 18 39 28 Q41 41 34 50Z"
+            fill="#FF5500" opacity="0.90"/>
+      <path class="fl-mid"
+            d="M34 50 Q29 43 30.5 33 Q32 25 34 21 Q36 25 37.5 33 Q39 43 34 50Z"
+            fill="#FF9900" opacity="0.94"/>
+      <path class="fl-inner"
+            d="M34 49 Q30.5 44 31.5 37 Q32.5 31 34 29 Q35.5 31 36.5 37 Q37.5 44 34 49Z"
+            fill="#FFDD00" opacity="0.90"/>
+      <path class="fl-core"
+            d="M34 47 Q32.5 44 33 40 Q33.5 37 34 36 Q34.5 37 35 40 Q35.5 44 34 47Z"
+            fill="#FFFFFF" opacity="0.85"/>
+
+      <!-- Book sticking up out of can -->
+      <rect x="26" y="34" width="16" height="24" rx="1"
+            fill="#6A0D0D" stroke="#4A0000" stroke-width="0.8"/>
+      <!-- Pages edge right -->
+      <rect x="40" y="35" width="2" height="22" rx="0.4"
+            fill="#F5E6C8" opacity="0.62"/>
+      <!-- Pages top -->
+      <rect x="27" y="34" width="14" height="2" rx="0.4"
+            fill="#F5E6C8" opacity="0.48"/>
+      <!-- Spine text ROMANTASY -->
+      <text font-family="Georgia,serif" font-size="3.0" fill="#FFCCA0" opacity="0.85"
+            letter-spacing="0.5"
+            transform="translate(34,46) rotate(-90)">ROMANTASY</text>
+
+      <!-- Lid handle -->
+      <rect x="29" y="54" width="10" height="4" rx="1"
+            fill="#3A2A18" stroke="#28180A" stroke-width="0.9"/>
+      <!-- Lid -->
+      <rect x="11" y="58" width="46" height="5" rx="1.5"
+            fill="#4A3828" stroke="#2E1E0E" stroke-width="1.1"/>
+      <!-- Can body -->
+      <rect x="14" y="63" width="40" height="28" rx="1.5"
+            fill="#5A4030" stroke="#3A2A18" stroke-width="1.1"/>
+      <!-- Ribs -->
+      <line x1="24" y1="63" x2="24" y2="91" stroke="#3A2A18" stroke-width="0.6" opacity="0.55"/>
+      <line x1="34" y1="63" x2="34" y2="91" stroke="#3A2A18" stroke-width="0.6" opacity="0.55"/>
+      <line x1="44" y1="63" x2="44" y2="91" stroke="#3A2A18" stroke-width="0.6" opacity="0.55"/>
+      <!-- Feet -->
+      <rect x="16" y="89" width="8" height="4" rx="1" fill="#3A2A18"/>
+      <rect x="44" y="89" width="8" height="4" rx="1" fill="#3A2A18"/>
+    </svg>
+    <div class="trash-caption">editorial opinion</div>
+  </div>
+</div>
+
+<!-- ============================================================
+     MAIN APP
+============================================================ -->
+<div id="app">
+
+  <header class="app-header">
+    <h1 class="app-title">The Oracle&rsquo;s Shelf</h1>
+    <p class="app-tagline">A library consultation for the discerning fantasy reader</p>
+  </header>
+
+  <div class="wrap">
+
+    <!-- ── STEP 1: BOOKS YOU LOVE ──────────────────────────── -->
+    <div class="divider" style="margin-top:3rem">
+      <div class="divider-line"></div>
+      <span class="divider-glyph">⁂</span>
+      <div class="divider-line r"></div>
+    </div>
+
+    <section class="sec-head">
+      <h2>Books You Love</h2>
+      <p class="sub">Mark the volumes that have captivated you. Select ten.</p>
+    </section>
+
+    <div class="count-wrap">
+      <span class="count-badge">Marked: <span class="n" id="loved-count">0</span> / 10</span>
+    </div>
+
+    <div class="search-wrap">
+      <span class="search-icon">&#9906;</span>
+      <input type="text" class="search-input" id="loved-search"
+             placeholder="Search title, series, or author&hellip;"
+             oninput="filterGrid('loved')">
+    </div>
+
+    <div class="book-grid" id="loved-grid"></div>
+
+  </div><!-- /wrap – closed to allow full-bleed rejected zone -->
+
+  <!-- ── STEP 2: THE REJECTED SHELF ─────────────────────────── -->
+  <div class="divider wrap" style="margin-top:1rem">
+    <div class="divider-line"></div>
+    <span class="divider-glyph">✦</span>
+    <div class="divider-line r"></div>
+  </div>
+
+  <div class="rejected-zone">
+    <div class="wrap">
+
+      <section class="sec-head">
+        <h2 style="color:#2a2438">The Rejected Shelf</h2>
+        <p class="sub" style="color:rgba(42,36,56,0.54)">The volumes that left you cold. Select up to three.</p>
+      </section>
+
+      <div class="count-wrap">
+        <span class="count-badge" style="background:var(--cool-shadow)">
+          Marked: <span class="n" id="rejected-count">0</span> / 3
+        </span>
+      </div>
+
+      <div class="search-wrap">
+        <span class="search-icon">&#9906;</span>
+        <input type="text" class="search-input" id="rejected-search"
+               placeholder="Search title, series, or author&hellip;"
+               oninput="filterGrid('rejected')">
+      </div>
+
+      <div class="book-grid" id="rejected-grid"></div>
+
+      <!-- Manual entry card -->
+      <div class="manual-card">
+        <div class="manual-card-title">&mdash;&nbsp;Additional Notes for the Oracle&nbsp;&mdash;</div>
+
+        <div class="mfield">
+          <label class="mlabel">
+            <span class="quill">&#10002;</span>
+            Books I&rsquo;d add to my favorites
+          </label>
+          <input type="text" class="minput" id="manual-loved"
+                 placeholder="e.g. The Deed of Paksenarrion, Tigana, The Black Prism&hellip;">
+        </div>
+
+        <div class="mfield">
+          <label class="mlabel">
+            <span class="quill">&#10002;</span>
+            Books I&rsquo;d add to my rejected shelf
+          </label>
+          <input type="text" class="minput" id="manual-rejected"
+                 placeholder="e.g. Eragon, Sword of Truth&hellip;">
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="wrap">
+
+    <!-- ── STEP 3: ORACLE ──────────────────────────────────── -->
+    <div class="divider" style="margin-top:0">
+      <div class="divider-line"></div>
+      <span class="divider-glyph">⁂</span>
+      <div class="divider-line r"></div>
+    </div>
+
+    <div class="oracle-zone">
+
+      <div id="oracle-btn-row">
+        <button class="oracle-btn" id="oracle-btn" onclick="consultOracle()" disabled>
+          Consult the Oracle
+        </button>
+        <p class="oracle-hint" id="oracle-hint">Select at least 5 books you love to proceed</p>
+      </div>
+
+      <!-- Loading state: flickering candle -->
+      <div class="oracle-loading" id="oracle-loading">
+        <svg class="candle-svg" viewBox="0 0 52 78" xmlns="http://www.w3.org/2000/svg">
+          <!-- Candle body -->
+          <rect x="18" y="32" width="16" height="42" rx="2"
+                fill="#F5E6C8" stroke="#C8842A" stroke-width="0.7"/>
+          <!-- Wax drips -->
+          <path d="M18 42 Q15 46 16.5 51 L18 51Z" fill="#F5E6C8"/>
+          <path d="M34 52 Q37 56 35.5 61 L34 61Z" fill="#F5E6C8"/>
+          <!-- Wick -->
+          <line x1="26" y1="32" x2="26" y2="24"
+                stroke="#3A2010" stroke-width="1.3" stroke-linecap="round"/>
+          <!-- Glow halo -->
+          <ellipse cx="26" cy="20" rx="11" ry="6.5" fill="rgba(255,195,55,0.09)"/>
+          <!-- Flame group -->
+          <g class="candle-flame-g">
+            <path d="M26 24 Q22 18 24 10 Q25 5 26 3 Q27 5 28 10 Q30 18 26 24Z"
+                  fill="#FF9900" opacity="0.87"/>
+            <path d="M26 23 Q23.5 18 25 12 Q25.8 8 26 7 Q26.2 8 27 12 Q28.5 18 26 23Z"
+                  fill="#FFDD00" opacity="0.93"/>
+            <ellipse cx="26" cy="14" rx="1.7" ry="3.3" fill="#FFFFFF" opacity="0.86"/>
+          </g>
+        </svg>
+        <div class="oracle-loading-text">The oracle is consulting the stacks&hellip;</div>
+      </div>
+
+      <!-- Error state -->
+      <div class="oracle-error" id="oracle-error">
+        <p>The oracle is unavailable. Try again.</p>
+        <button class="round-btn" onclick="retryOracle()">Try Again</button>
+      </div>
+
+    </div><!-- /oracle-zone -->
+
+    <!-- ── STEP 4: RESULTS ─────────────────────────────────── -->
+    <section id="results" class="hidden">
+
+      <div class="divider">
+        <div class="divider-line"></div>
+        <span class="divider-glyph">✦</span>
+        <div class="divider-line r"></div>
+      </div>
+
+      <div class="results-head">
+        <h2>From the Oracle&rsquo;s Collection</h2>
+        <p>Eight volumes selected for your particular disposition</p>
+      </div>
+
+      <div class="catalog-stack" id="catalog-stack"></div>
+
+      <div class="another-round">
+        <button class="round-btn" onclick="requestAnotherRound()">
+          Request Another Round
+        </button>
+      </div>
+
+    </section>
+
+  </div><!-- /wrap -->
+</div><!-- /app -->
+
+<!-- ============================================================
+     JAVASCRIPT
+============================================================ -->
+<script>
+// REPLACE WITH YOUR API KEY
+const ANTHROPIC_API_KEY = 'your-api-key-here';
+
+// ──────────────────────────────────────────────
+// BOOK CATALOGUE
+// ──────────────────────────────────────────────
+const BOOKS = [
+  // Epic Fantasy
+  { id:  1, title: "The Way of Kings",              series: "The Stormlight Archive",            author: "Brandon Sanderson",      isbn: "0765326353" },
+  { id:  2, title: "The Final Empire",              series: "Mistborn",                          author: "Brandon Sanderson",      isbn: "0765311785" },
+  { id:  3, title: "The Eye of the World",          series: "The Wheel of Time",                 author: "Robert Jordan",          isbn: "0812511816" },
+  { id:  4, title: "Gardens of the Moon",           series: "Malazan Book of the Fallen",        author: "Steven Erikson",         isbn: "0553813714" },
+  { id:  5, title: "The Name of the Wind",          series: "The Kingkiller Chronicle",          author: "Patrick Rothfuss",       isbn: "0756404746" },
+  { id:  6, title: "The Blade Itself",              series: "The First Law",                     author: "Joe Abercrombie",        isbn: "0575079797" },
+  { id:  7, title: "A Game of Thrones",             series: "A Song of Ice and Fire",            author: "George R.R. Martin",     isbn: "0553573403" },
+  { id:  8, title: "The Fellowship of the Ring",    series: "The Lord of the Rings",             author: "J.R.R. Tolkien",         isbn: "0618346252" },
+  { id:  9, title: "The Lies of Locke Lamora",      series: "Gentleman Bastards",                author: "Scott Lynch",            isbn: "0553804677" },
+  { id: 10, title: "Assassin's Apprentice",         series: "The Farseer Trilogy",               author: "Robin Hobb",             isbn: "0553573411" },
+  // Classic Fantasy
+  { id: 11, title: "The Sword of Shannara",         series: "The Shannara Chronicles",           author: "Terry Brooks",           isbn: "0345314255" },
+  { id: 12, title: "The Dragonbone Chair",          series: "Memory, Sorrow, and Thorn",         author: "Tad Williams",           isbn: "0886774845" },
+  { id: 13, title: "Magician: Apprentice",          series: "The Riftwar Saga",                  author: "Raymond E. Feist",       isbn: "0553564943" },
+  { id: 14, title: "The Hobbit",                    series: "The Hobbit",                        author: "J.R.R. Tolkien",         isbn: "0547928227" },
+  { id: 15, title: "A Wizard of Earthsea",          series: "The Earthsea Cycle",                author: "Ursula K. Le Guin",      isbn: "0553262505" },
+  { id: 16, title: "Tigana",                        series: "Standalone",                        author: "Guy Gavriel Kay",        isbn: "0451452836" },
+  { id: 17, title: "The Chronicles of Amber",       series: "Chronicles of Amber",               author: "Roger Zelazny",          isbn: "0380809060" },
+  { id: 18, title: "Lord Foul's Bane",              series: "The Chronicles of Thomas Covenant", author: "Stephen R. Donaldson",   isbn: "0345348656" },
+  // Grimdark
+  { id: 19, title: "Prince of Thorns",              series: "The Broken Empire",                 author: "Mark Lawrence",          isbn: "0441020364" },
+  { id: 20, title: "The Darkness That Comes Before",series: "The Second Apocalypse",             author: "R. Scott Bakker",        isbn: "1585673765" },
+  { id: 21, title: "The Steel Remains",             series: "A Land Fit for Heroes",             author: "Richard K. Morgan",      isbn: "0345493966" },
+  { id: 22, title: "The Black Company",             series: "The Black Company",                 author: "Glen Cook",              isbn: "0812508181" },
+  { id: 23, title: "Best Served Cold",              series: "First Law World",                   author: "Joe Abercrombie",        isbn: "0575082097" },
+  { id: 24, title: "The Poppy War",                 series: "The Poppy War Trilogy",             author: "R.F. Kuang",             isbn: "0062662589" },
+  // Progression Fantasy
+  { id: 25, title: "Unsouled",                      series: "Cradle",                            author: "Will Wight",             isbn: "0989671437" },
+  { id: 26, title: "Dungeon Crawler Carl",          series: "Dungeon Crawler Carl",              author: "Matt Dinniman",          isbn: "0593497953" },
+  { id: 27, title: "He Who Fights With Monsters",   series: "He Who Fights With Monsters",       author: "Jason Cheyne",           isbn: "9781647100421" },
+  // Sci-Fantasy
+  { id: 28, title: "Red Rising",                    series: "The Red Rising Saga",               author: "Pierce Brown",           isbn: "034553980X" },
+  { id: 29, title: "The Fifth Season",              series: "The Broken Earth",                  author: "N.K. Jemisin",           isbn: "0316229296" },
+  { id: 30, title: "Dune",                          series: "Dune Chronicles",                   author: "Frank Herbert",          isbn: "0441172717" },
+  // More Fantasy
+  { id: 31, title: "The Way of Shadows",            series: "Night Angel",                       author: "Brent Weeks",            isbn: "0316033677" },
+  { id: 32, title: "Words of Radiance",             series: "The Stormlight Archive",            author: "Brandon Sanderson",      isbn: "0765326361" },
+  { id: 33, title: "Warbreaker",                    series: "Warbreaker",                        author: "Brandon Sanderson",      isbn: "0765360039" },
+  { id: 34, title: "Elantris",                      series: "Elantris",                          author: "Brandon Sanderson",      isbn: "0765311771" },
+  { id: 35, title: "Jonathan Strange & Mr Norrell", series: "Standalone",                        author: "Susanna Clarke",         isbn: "1582344167" },
+  { id: 36, title: "A Darker Shade of Magic",       series: "Shades of Magic",                   author: "V.E. Schwab",            isbn: "0765376466" },
+  { id: 37, title: "The Last Wish",                 series: "The Witcher Saga",                  author: "Andrzej Sapkowski",      isbn: "0316029181" },
+  { id: 38, title: "Empire of the Vampire",         series: "Empire of the Vampire",             author: "Jay Kristoff",           isbn: "1250267609" },
+  { id: 39, title: "Half a King",                   series: "Shattered Sea",                     author: "Joe Abercrombie",        isbn: "0307949044" },
+  { id: 40, title: "A Memory Called Empire",        series: "Teixcalaan",                        author: "Arkady Martine",         isbn: "1250186439" },
+  { id: 41, title: "The Goblin Emperor",            series: "Standalone",                        author: "Katherine Addison",      isbn: "0765336294" },
+  { id: 42, title: "Rhythm of War",                 series: "The Stormlight Archive",            author: "Brandon Sanderson",      isbn: "0765326388" },
+  { id: 43, title: "The Priory of the Orange Tree", series: "Standalone",                        author: "Samantha Shannon",       isbn: "1408872420" },
+  { id: 44, title: "Oathbringer",                   series: "The Stormlight Archive",            author: "Brandon Sanderson",      isbn: "0765326374" },
+  { id: 45, title: "The Once and Future King",      series: "Standalone",                        author: "T.H. White",             isbn: "0441627404" },
+  // Romantasy
+  { id: 46, title: "A Court of Thorns and Roses",   series: "ACOTAR",                            author: "Sarah J. Maas",          isbn: "1619634449" },
+  { id: 47, title: "Fourth Wing",                   series: "The Empyrean",                      author: "Rebecca Yarros",         isbn: "1649374046" },
+  { id: 48, title: "From Blood and Ash",            series: "Blood and Ash",                     author: "Jennifer L. Armentrout", isbn: "1952457327" },
+  { id: 49, title: "Throne of Glass",               series: "Throne of Glass",                   author: "Sarah J. Maas",          isbn: "1599906953" },
+  { id: 50, title: "House of Earth and Blood",      series: "Crescent City",                     author: "Sarah J. Maas",          isbn: "1635574048" },
+];
+
+// ──────────────────────────────────────────────
+// STATE
+// ──────────────────────────────────────────────
+const loved    = new Set();
+const rejected = new Set();
+
+// ──────────────────────────────────────────────
+// BOOT
+// ──────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  renderGrid('loved',    BOOKS);
+  renderGrid('rejected', BOOKS);
+  updateOracleState();
+
+  // Loading screen timer: 4.6 s
+  setTimeout(() => {
+    const loading = document.getElementById('loading');
+    const app     = document.getElementById('app');
+    loading.classList.add('fade-out');
+    app.style.display = 'block';
+    setTimeout(() => { loading.style.display = 'none'; }, 1100);
+  }, 4600);
+});
+
+// ──────────────────────────────────────────────
+// RENDERING
+// ──────────────────────────────────────────────
+function renderGrid(mode, books) {
+  const grid = document.getElementById(`${mode}-grid`);
+  grid.innerHTML = '';
+  books.forEach(b => grid.appendChild(makeItem(b, mode)));
+}
+
+function makeItem(book, mode) {
+  const set = mode === 'loved' ? loved : rejected;
+  const div = document.createElement('div');
+  div.className = 'book-item' + (set.has(book.id) ? ' selected' : '');
+  div.dataset.id   = book.id;
+  div.dataset.mode = mode;
+
+  const label = book.series !== 'Standalone' ? book.series : book.title;
+
+  div.innerHTML = `
+    <div class="cover-wrap">
+      <img class="cover-img"
+           src="https://covers.openlibrary.org/b/isbn/${book.isbn}-M.jpg"
+           alt="${x(book.title)}"
+           loading="lazy"
+           onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <div class="cover-ph">
+        <span class="pht">${x(book.title)}</span>
+        <span class="pha">${x(book.author)}</span>
+      </div>
+      <div class="chk">&#10003;</div>
+    </div>
+    <div class="book-lbl"  title="${x(label)}">${x(label)}</div>
+    <div class="book-auth" title="${x(book.author)}">${x(book.author)}</div>
+  `;
+
+  div.addEventListener('click', () => toggleBook(book.id, mode));
+  return div;
+}
+
+// HTML-escape helper
+function x(s) {
+  return String(s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ──────────────────────────────────────────────
+// SELECTION TOGGLE
+// ──────────────────────────────────────────────
+function toggleBook(id, mode) {
+  const set   = mode === 'loved' ? loved : rejected;
+  const limit = mode === 'loved' ? 10 : 3;
+
+  if (set.has(id)) {
+    set.delete(id);
+  } else {
+    if (set.size >= limit) return;
+    set.add(id);
+  }
+
+  // Sync all DOM items carrying this id (covers both grids)
+  document.querySelectorAll(`.book-item[data-id="${id}"]`).forEach(el => {
+    const s = el.dataset.mode === 'loved' ? loved : rejected;
+    el.classList.toggle('selected', s.has(id));
+  });
+
+  document.getElementById('loved-count').textContent    = loved.size;
+  document.getElementById('rejected-count').textContent = rejected.size;
+  updateOracleState();
+}
+
+// ──────────────────────────────────────────────
+// SEARCH
+// ──────────────────────────────────────────────
+function filterGrid(mode) {
+  const q = document.getElementById(`${mode}-search`).value.toLowerCase().trim();
+  const books = q
+    ? BOOKS.filter(b =>
+        b.title.toLowerCase().includes(q)  ||
+        b.series.toLowerCase().includes(q) ||
+        b.author.toLowerCase().includes(q))
+    : BOOKS;
+  renderGrid(mode, books);
+}
+
+// ──────────────────────────────────────────────
+// ORACLE BUTTON STATE
+// ──────────────────────────────────────────────
+function updateOracleState() {
+  const btn  = document.getElementById('oracle-btn');
+  const hint = document.getElementById('oracle-hint');
+  const n    = loved.size;
+  if (n < 5) {
+    btn.disabled     = true;
+    hint.textContent = `Select at least 5 books you love to proceed (${n} / 5)`;
+  } else {
+    btn.disabled     = false;
+    hint.textContent = `${n} book${n !== 1 ? 's' : ''} selected — ready to consult`;
+  }
+}
+
+// ──────────────────────────────────────────────
+// CONSULT THE ORACLE
+// ──────────────────────────────────────────────
+async function consultOracle() {
+  const lovedList    = buildList(loved,    'loved');
+  const rejectedList = buildList(rejected, 'rejected');
+
+  // Merge manual entries
+  const manL = document.getElementById('manual-loved').value.trim();
+  const manR = document.getElementById('manual-rejected').value.trim();
+  if (manL) manL.split(',').map(s => s.trim()).filter(Boolean).forEach(t => lovedList.push(t));
+  if (manR) manR.split(',').map(s => s.trim()).filter(Boolean).forEach(t => rejectedList.push(t));
+
+  setUIState('loading');
+
+  const system = `You are a fantasy literature expert and librarian with encyclopedic knowledge of fantasy series. You recommend series based purely on the reader's taste profile. If their selected books skew toward romantasy-adjacent titles, lean into that. If they skew toward grimdark or epic fantasy, reflect that instead. You respond only in valid JSON.`;
+
+  const user = `A reader enjoys these books/series: ${lovedList.join(', ')}. They did not enjoy: ${rejectedList.length ? rejectedList.join(', ') : 'nothing specified'}. Recommend exactly 8 fantasy series they have not already listed. For each series return: { "title": string, "author": string, "books_in_series": integer, "is_complete": boolean, "one_sentence_description": string, "why_this_reader": string, "subgenre": string }. Return only a JSON array.`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': ANTHROPIC_API_KEY,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 2400,
+        system,
+        messages: [{ role: 'user', content: user }]
+      })
+    });
+
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+    const data = await res.json();
+    const text = data.content[0].text;
+
+    let recs;
+    const m = text.match(/\[[\s\S]*\]/);
+    recs = JSON.parse(m ? m[0] : text);
+
+    renderResults(recs);
+    setUIState('results');
+
+  } catch (err) {
+    console.error('Oracle error:', err);
+    setUIState('error');
+  }
+}
+
+function buildList(set, mode) {
+  return [...set].map(id => {
+    const b = BOOKS.find(bk => bk.id === id);
+    if (!b) return null;
+    return b.series !== 'Standalone'
+      ? `${b.series} by ${b.author}`
+      : `${b.title} by ${b.author}`;
+  }).filter(Boolean);
+}
+
+// ──────────────────────────────────────────────
+// UI STATE MACHINE
+// ──────────────────────────────────────────────
+function setUIState(state) {
+  document.getElementById('oracle-btn-row').classList.toggle('hidden',  state === 'loading');
+  document.getElementById('oracle-loading').classList.toggle('active',  state === 'loading');
+  document.getElementById('oracle-error').classList.toggle('active',    state === 'error');
+  document.getElementById('results').classList.toggle('hidden',         state !== 'results');
+
+  if (state === 'error') {
+    document.getElementById('oracle-btn-row').classList.remove('hidden');
+  }
+}
+
+function retryOracle() {
+  document.getElementById('oracle-error').classList.remove('active');
+  consultOracle();
+}
+
+function requestAnotherRound() {
+  setUIState('idle');
+  document.getElementById('oracle-btn-row').classList.remove('hidden');
+  setTimeout(() => {
+    document.getElementById('oracle-btn-row').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, 60);
+  setTimeout(consultOracle, 500);
+}
+
+// ──────────────────────────────────────────────
+// RENDER CATALOG CARDS
+// ──────────────────────────────────────────────
+function renderResults(recs) {
+  const stack = document.getElementById('catalog-stack');
+  stack.innerHTML = '';
+
+  recs.forEach((rec, i) => {
+    const num      = String(i + 1).padStart(2, '0');
+    const complete = Boolean(rec.is_complete);
+    const books    = Math.max(1, parseInt(rec.books_in_series) || 1);
+    const volText  = complete
+      ? (books === 1 ? 'Standalone volume' : `Vol. 1–${books}`)
+      : `Vol. 1–${books} (ongoing)`;
+
+    const card = document.createElement('div');
+    card.className = 'ccard';
+    card.innerHTML = `
+      <div class="card-num">${num}</div>
+      <div class="card-top">
+        <div class="card-meta">
+          <div class="card-title">${x(rec.title)}</div>
+          <div class="card-author">${x(rec.author)}</div>
+          <div class="card-vols">${x(volText)}</div>
+        </div>
+        <div class="stamp ${complete ? 'stamp-c' : 'stamp-o'}">${complete ? 'COMPLETE' : 'ONGOING'}</div>
+      </div>
+      <div class="card-desc">${x(rec.one_sentence_description)}</div>
+      <div class="card-why">
+        <span class="why-label">Why you&rsquo;ll like this</span>
+        ${x(rec.why_this_reader)}
+      </div>
+      <div class="card-genre">${x(rec.subgenre)}</div>
+    `;
+    stack.appendChild(card);
+  });
+
+  setTimeout(() => {
+    document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 80);
+}
+</script>
+
+</body>
+</html>
