@@ -1362,6 +1362,21 @@ function getSlotValues(containerId) {
     .filter(Boolean);
 }
 
+function getSlotPairs(containerId) {
+  return [...document.querySelectorAll(`#${containerId} .slot`)]
+    .map(slot => {
+      const lk = slot.querySelector('.slot-locked');
+      if (lk && lk.style.display === 'flex') {
+        return {
+          series: slot.querySelector('.slot-locked-name').textContent.trim(),
+          author: slot.querySelector('.slot-locked-author').textContent.replace(/^—\s*/, '').trim()
+        };
+      }
+      return null;
+    })
+    .filter(Boolean);
+}
+
 // ── EASTER EGGS ────────────────────────────────────────────
 const EE_TRIGGERS = {
   'stormlight': 'lightning',
@@ -1631,8 +1646,10 @@ function esc(s) {
 async function consultOracle() {
   if (!getKey()) { showKeyScreen(); return; }
 
-  const loved    = getSlotValues('loved-slots');
-  const rejected = getSlotValues('rejected-slots');
+  const loved        = getSlotValues('loved-slots');
+  const rejectedPairs = getSlotPairs('rejected-slots');
+  const rejected      = rejectedPairs.map(p => p.series);
+  const bannedAuthors = [...new Set(rejectedPairs.map(p => p.author).filter(Boolean))];
 
   setUIState('loading');
 
@@ -1647,7 +1664,17 @@ async function consultOracle() {
       grContext += ` Books they rated 1–2 stars (disliked): ${grData.disliked.slice(0, 20).join('; ')}.`;
   }
 
-  const user = `A reader enjoys these series: ${loved.join(', ')}. They did not enjoy: ${rejected.length ? rejected.join(', ') : 'nothing specified'}.${grContext} Recommend exactly 15 fantasy series not already listed above, ordered from best match to good match. Return a JSON array where each object has: { "title": string, "author": string, "books_in_series": integer, "is_complete": boolean, "one_sentence_description": string, "why_this_reader": string, "subgenre": string }.`;
+  let banContext = '';
+  if (rejected.length > 0) {
+    banContext += ` HARD EXCLUSIONS — these series are disliked: ${rejected.join('; ')}.`;
+    if (bannedAuthors.length > 0) {
+      banContext += ` Treat these authors as completely banned: ${bannedAuthors.join('; ')}. Do NOT recommend ANY work by these authors — no other series, no standalones, no co-authored books, no spinoffs. Also do NOT mention these authors or their books anywhere in the "why_this_reader" field as positive comparisons. They are off-limits entirely.`;
+    } else {
+      banContext += ` First identify the authors of those disliked series, then exclude every work by those authors (other series, standalones, co-authored books, spinoffs). Do NOT mention any of those authors or their books as positive comparisons in "why_this_reader".`;
+    }
+  }
+
+  const user = `A reader enjoys these series: ${loved.join(', ')}.${banContext}${grContext} Recommend exactly 15 fantasy series not already listed above, ordered from best match to good match. Return a JSON array where each object has: { "title": string, "author": string, "books_in_series": integer, "is_complete": boolean, "one_sentence_description": string, "why_this_reader": string, "subgenre": string }.`;
 
   try {
     let res;
@@ -1714,6 +1741,14 @@ async function consultOracle() {
     } catch(e) { throw new Error(`Could not parse response: ${e.message}`); }
 
     if (!Array.isArray(recs) || !recs.length) throw new Error('No recommendations returned');
+
+    // Safety net: drop any rec by a banned author (case/punctuation insensitive)
+    if (bannedAuthors.length > 0) {
+      const norm = s => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+      const banned = bannedAuthors.map(norm);
+      recs = recs.filter(r => !banned.some(b => norm(r.author).includes(b) || b.includes(norm(r.author))));
+      if (!recs.length) throw new Error('No recommendations remained after author filtering');
+    }
 
     renderResults(recs);
     setUIState('results');
