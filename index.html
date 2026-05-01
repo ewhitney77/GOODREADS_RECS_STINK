@@ -449,13 +449,19 @@ body { background: var(--mahogany); color: var(--ink); font-family: var(--body);
 /* ── CANDLE LOADING ─────────────────────────────────────────── */
 .oracle-loading { display:none; flex-direction:column; align-items:center; gap:1.3rem; padding:2.5rem 0; }
 .oracle-loading.active { display:flex; }
-.candle-svg { width:52px; height:78px; overflow:visible; }
-.candle-flame-g { animation:candleFlicker 0.88s ease-in-out infinite alternate; transform-origin:26px 22px; }
-@keyframes candleFlicker {
-  0%  {transform:scaleY(1.0) scaleX(1.0)  rotate(-1.5deg);opacity:0.9}
-  28% {transform:scaleY(1.13) scaleX(0.90) rotate(2.2deg); opacity:1.0}
-  64% {transform:scaleY(0.93) scaleX(1.07) rotate(-2deg);  opacity:0.87}
-  100%{transform:scaleY(1.07) scaleX(0.95) rotate(1deg);   opacity:0.95}
+.librarian-svg { width:130px; height:140px; overflow:visible; }
+.librarian-arm  { animation: librarianBrowse 2.4s ease-in-out infinite; transform-origin: 70px 70px; }
+.librarian-head { animation: librarianTilt   2.4s ease-in-out infinite; transform-origin: 64px 32px; }
+@keyframes librarianBrowse {
+  0%,100% { transform: rotate(0deg); }
+  25%     { transform: rotate(-8deg) translateX(-2px); }
+  50%     { transform: rotate(2deg)  translateX(3px); }
+  75%     { transform: rotate(-4deg) translateX(0); }
+}
+@keyframes librarianTilt {
+  0%,100% { transform: rotate(0deg); }
+  25%     { transform: rotate(-3deg); }
+  60%     { transform: rotate(2deg); }
 }
 .oracle-loading-text { font-family:var(--serif); font-style:italic; font-size:1.05rem; color:var(--mahogany); animation:breathe 1.9s ease-in-out infinite; }
 
@@ -860,17 +866,102 @@ body { background: var(--mahogany); color: var(--ink); font-family: var(--body);
         <p class="oracle-hint" id="oracle-hint">Name at least three series you love to proceed</p>
       </div>
       <div class="oracle-loading" id="oracle-loading">
-        <svg class="candle-svg" viewBox="0 0 52 78" xmlns="http://www.w3.org/2000/svg">
-          <rect x="18" y="32" width="16" height="42" rx="2" fill="#F5E6C8" stroke="#C8842A" stroke-width="0.7"/>
-          <path d="M18 42 Q15 46 16.5 51 L18 51Z" fill="#F5E6C8"/>
-          <path d="M34 52 Q37 56 35.5 61 L34 61Z" fill="#F5E6C8"/>
-          <line x1="26" y1="32" x2="26" y2="24" stroke="#3A2010" stroke-width="1.3" stroke-linecap="round"/>
-          <ellipse cx="26" cy="20" rx="11" ry="6.5" fill="rgba(255,195,55,0.09)"/>
-          <g class="candle-flame-g">
-            <path d="M26 24 Q22 18 24 10 Q25 5 26 3 Q27 5 28 10 Q30 18 26 24Z" fill="#FF9900" opacity="0.87"/>
-            <path d="M26 23 Q23.5 18 25 12 Q25.8 8 26 7 Q26.2 8 27 12 Q28.5 18 26 23Z" fill="#FFDD00" opacity="0.93"/>
-            <ellipse cx="26" cy="14" rx="1.7" ry="3.3" fill="#FFFFFF" opacity="0.86"/>
+        <svg class="librarian-svg" viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg">
+          <!-- Bookshelf in background -->
+          <rect x="2"  y="6"   width="136" height="128" fill="#3A2410" stroke="#1a0c05" stroke-width="1.5"/>
+          <rect x="6"  y="10"  width="128" height="3"   fill="#5a3820"/>
+          <rect x="6"  y="50"  width="128" height="3"   fill="#5a3820"/>
+          <rect x="6"  y="90"  width="128" height="3"   fill="#5a3820"/>
+          <rect x="6"  y="130" width="128" height="3"   fill="#5a3820"/>
+          <!-- Top shelf books -->
+          <rect x="10" y="14" width="6"  height="34" fill="#7A1E1E"/>
+          <rect x="17" y="16" width="5"  height="32" fill="#2D5016"/>
+          <rect x="23" y="14" width="7"  height="34" fill="#2C4A6B"/>
+          <rect x="31" y="18" width="4"  height="30" fill="#D4922A"/>
+          <rect x="36" y="14" width="6"  height="34" fill="#5C2E2E"/>
+          <rect x="43" y="16" width="5"  height="32" fill="#2D5016"/>
+          <rect x="49" y="14" width="6"  height="34" fill="#1a3a2a"/>
+          <rect x="56" y="18" width="4"  height="30" fill="#7A1E1E"/>
+          <rect x="100" y="14" width="6"  height="34" fill="#5C2E2E"/>
+          <rect x="107" y="16" width="5"  height="32" fill="#2C4A6B"/>
+          <rect x="113" y="14" width="7"  height="34" fill="#3a2410"/>
+          <rect x="121" y="18" width="4"  height="30" fill="#D4922A"/>
+          <rect x="126" y="14" width="6"  height="34" fill="#2D5016"/>
+
+          <!-- Middle shelf with gap where librarian is browsing -->
+          <rect x="10"  y="54" width="6" height="34" fill="#2D5016"/>
+          <rect x="17"  y="56" width="5" height="32" fill="#7A1E1E"/>
+          <rect x="23"  y="54" width="6" height="34" fill="#2C4A6B"/>
+          <rect x="100" y="54" width="6" height="34" fill="#5C2E2E"/>
+          <rect x="107" y="56" width="5" height="32" fill="#2D5016"/>
+          <rect x="113" y="54" width="6" height="34" fill="#7A1E1E"/>
+          <rect x="120" y="56" width="5" height="32" fill="#2C4A6B"/>
+          <rect x="126" y="54" width="6" height="34" fill="#D4922A"/>
+
+          <!-- Bottom shelf books -->
+          <rect x="10" y="94" width="7" height="34" fill="#5C2E2E"/>
+          <rect x="18" y="96" width="5" height="32" fill="#2D5016"/>
+          <rect x="24" y="94" width="6" height="34" fill="#2C4A6B"/>
+          <rect x="31" y="96" width="4" height="32" fill="#7A1E1E"/>
+          <rect x="36" y="94" width="6" height="34" fill="#3a2410"/>
+          <rect x="43" y="96" width="5" height="32" fill="#D4922A"/>
+          <rect x="49" y="94" width="6" height="34" fill="#1a3a2a"/>
+          <rect x="56" y="96" width="4" height="32" fill="#7A1E1E"/>
+          <rect x="62" y="94" width="6" height="34" fill="#2D5016"/>
+          <rect x="69" y="96" width="5" height="32" fill="#5C2E2E"/>
+          <rect x="100" y="94" width="6" height="34" fill="#3a2410"/>
+          <rect x="107" y="96" width="5" height="32" fill="#7A1E1E"/>
+          <rect x="113" y="94" width="6" height="34" fill="#2C4A6B"/>
+          <rect x="120" y="96" width="6" height="34" fill="#2D5016"/>
+          <rect x="127" y="96" width="5" height="32" fill="#5C2E2E"/>
+
+          <!-- Old librarian lady - silhouette in front of middle shelf -->
+          <!-- Long skirt/dress -->
+          <path d="M52 92 Q48 110 46 132 L82 132 Q80 110 76 92 Z" fill="#3a2848" stroke="#1a0c20" stroke-width="0.8"/>
+          <!-- Shoes -->
+          <ellipse cx="54" cy="133" rx="4" ry="2" fill="#1a0c05"/>
+          <ellipse cx="74" cy="133" rx="4" ry="2" fill="#1a0c05"/>
+          <!-- Body / shawl -->
+          <path d="M50 92 Q48 78 52 64 Q56 56 64 54 Q72 56 76 64 Q80 78 78 92 Z" fill="#5a3a4a" stroke="#2a1a28" stroke-width="0.8"/>
+          <!-- Shawl trim -->
+          <path d="M50 92 Q48 84 50 78 L78 78 Q80 84 78 92" fill="none" stroke="#7a5060" stroke-width="0.6" opacity="0.8"/>
+          <!-- Cardigan buttons -->
+          <circle cx="64" cy="68" r="0.8" fill="#d4a040"/>
+          <circle cx="64" cy="74" r="0.8" fill="#d4a040"/>
+          <circle cx="64" cy="80" r="0.8" fill="#d4a040"/>
+          <circle cx="64" cy="86" r="0.8" fill="#d4a040"/>
+
+          <!-- Head and bun (animated tilt) -->
+          <g class="librarian-head">
+            <!-- Hair bun behind head -->
+            <ellipse cx="64" cy="22" rx="11" ry="9" fill="#9a8a78"/>
+            <ellipse cx="64" cy="18" rx="6" ry="5" fill="#7a6a58"/>
+            <!-- Face -->
+            <ellipse cx="64" cy="32" rx="8" ry="9" fill="#e8c8a8" stroke="#a08868" stroke-width="0.6"/>
+            <!-- Glasses -->
+            <circle cx="61" cy="32" r="2.4" fill="rgba(180,200,220,0.35)" stroke="#1a0c05" stroke-width="0.8"/>
+            <circle cx="67" cy="32" r="2.4" fill="rgba(180,200,220,0.35)" stroke="#1a0c05" stroke-width="0.8"/>
+            <line x1="63.4" y1="32" x2="64.6" y2="32" stroke="#1a0c05" stroke-width="0.6"/>
+            <!-- Pursed lips -->
+            <path d="M62 38 Q64 39 66 38" stroke="#8a3030" stroke-width="0.7" fill="none" stroke-linecap="round"/>
+            <!-- Hair wisps -->
+            <path d="M56 24 Q54 26 55 30" stroke="#9a8a78" stroke-width="0.8" fill="none"/>
+            <path d="M72 24 Q74 26 73 30" stroke="#9a8a78" stroke-width="0.8" fill="none"/>
           </g>
+
+          <!-- Arm reaching for a book (animated) -->
+          <g class="librarian-arm">
+            <!-- Sleeve -->
+            <path d="M76 66 Q86 64 92 70 Q94 72 92 74 Q86 72 78 72 Z" fill="#5a3a4a" stroke="#2a1a28" stroke-width="0.6"/>
+            <!-- Hand -->
+            <ellipse cx="93" cy="72" rx="3" ry="2.4" fill="#e8c8a8" stroke="#a08868" stroke-width="0.5"/>
+            <!-- Book being pulled -->
+            <rect x="92" y="62" width="5" height="14" fill="#d4922a" stroke="#5a3210" stroke-width="0.5"/>
+            <rect x="93" y="63" width="0.5" height="12" fill="#5a3210" opacity="0.5"/>
+          </g>
+          <!-- Other arm at side -->
+          <path d="M52 66 Q46 72 48 82" stroke="#5a3a4a" stroke-width="4" fill="none" stroke-linecap="round"/>
+          <ellipse cx="48" cy="83" rx="2.5" ry="2" fill="#e8c8a8"/>
         </svg>
         <div class="oracle-loading-text">The oracle is consulting the stacks&hellip;</div>
       </div>
