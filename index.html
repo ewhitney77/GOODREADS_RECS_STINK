@@ -1017,64 +1017,66 @@ const ANTHROPIC_API_KEY = 'your-api-key-here';
 // ──────────────────────────────────────────────
 // BOOK CATALOGUE
 // ──────────────────────────────────────────────
+// Each entry represents a full series. `isbn` is the first book's ISBN for cover art.
 const BOOKS = [
   // Epic Fantasy
-  { id:  1, title: "The Way of Kings",              series: "The Stormlight Archive",            author: "Brandon Sanderson",      isbn: "0765326353" },
-  { id:  2, title: "The Final Empire",              series: "Mistborn",                          author: "Brandon Sanderson",      isbn: "0765311785" },
-  { id:  3, title: "The Eye of the World",          series: "The Wheel of Time",                 author: "Robert Jordan",          isbn: "0812511816" },
-  { id:  4, title: "Gardens of the Moon",           series: "Malazan Book of the Fallen",        author: "Steven Erikson",         isbn: "0553813714" },
-  { id:  5, title: "The Name of the Wind",          series: "The Kingkiller Chronicle",          author: "Patrick Rothfuss",       isbn: "0756404746" },
-  { id:  6, title: "The Blade Itself",              series: "The First Law",                     author: "Joe Abercrombie",        isbn: "0575079797" },
-  { id:  7, title: "A Game of Thrones",             series: "A Song of Ice and Fire",            author: "George R.R. Martin",     isbn: "0553573403" },
-  { id:  8, title: "The Fellowship of the Ring",    series: "The Lord of the Rings",             author: "J.R.R. Tolkien",         isbn: "0618346252" },
-  { id:  9, title: "The Lies of Locke Lamora",      series: "Gentleman Bastards",                author: "Scott Lynch",            isbn: "0553804677" },
-  { id: 10, title: "Assassin's Apprentice",         series: "The Farseer Trilogy",               author: "Robin Hobb",             isbn: "0553573411" },
+  { id:  1, series: "The Stormlight Archive",            author: "Brandon Sanderson",      isbn: "0765326353" },
+  { id:  2, series: "Mistborn Trilogy",                  author: "Brandon Sanderson",      isbn: "0765311785" },
+  { id:  3, series: "The Wheel of Time",                 author: "Robert Jordan",          isbn: "0812511816" },
+  { id:  4, series: "Malazan Book of the Fallen",        author: "Steven Erikson",         isbn: "0553813714" },
+  { id:  5, series: "The Kingkiller Chronicle",          author: "Patrick Rothfuss",       isbn: "0756404746" },
+  { id:  6, series: "The First Law Trilogy",             author: "Joe Abercrombie",        isbn: "0575079797" },
+  { id:  7, series: "A Song of Ice and Fire",            author: "George R.R. Martin",     isbn: "0553573403" },
+  { id:  8, series: "The Lord of the Rings",             author: "J.R.R. Tolkien",         isbn: "0618346252" },
+  { id:  9, series: "Gentleman Bastards",                author: "Scott Lynch",            isbn: "0553804677" },
+  { id: 10, series: "The Farseer Trilogy",               author: "Robin Hobb",             isbn: "0553573411" },
+  // Must-haves
+  { id: 11, series: "Harry Potter",                      author: "J.K. Rowling",           isbn: "0439708184" },
+  { id: 12, series: "Cradle",                            author: "Will Wight",             isbn: "0989671437" },
+  { id: 13, series: "The Licanius Trilogy",              author: "James Islington",        isbn: "0316274186" },
+  { id: 14, series: "The Red Rising Saga",               author: "Pierce Brown",           isbn: "034553980X" },
   // Classic Fantasy
-  { id: 11, title: "The Sword of Shannara",         series: "The Shannara Chronicles",           author: "Terry Brooks",           isbn: "0345314255" },
-  { id: 12, title: "The Dragonbone Chair",          series: "Memory, Sorrow, and Thorn",         author: "Tad Williams",           isbn: "0886774845" },
-  { id: 13, title: "Magician: Apprentice",          series: "The Riftwar Saga",                  author: "Raymond E. Feist",       isbn: "0553564943" },
-  { id: 14, title: "The Hobbit",                    series: "The Hobbit",                        author: "J.R.R. Tolkien",         isbn: "0547928227" },
-  { id: 15, title: "A Wizard of Earthsea",          series: "The Earthsea Cycle",                author: "Ursula K. Le Guin",      isbn: "0553262505" },
-  { id: 16, title: "Tigana",                        series: "Standalone",                        author: "Guy Gavriel Kay",        isbn: "0451452836" },
-  { id: 17, title: "The Chronicles of Amber",       series: "Chronicles of Amber",               author: "Roger Zelazny",          isbn: "0380809060" },
-  { id: 18, title: "Lord Foul's Bane",              series: "The Chronicles of Thomas Covenant", author: "Stephen R. Donaldson",   isbn: "0345348656" },
+  { id: 15, series: "The Shannara Chronicles",           author: "Terry Brooks",           isbn: "0345314255" },
+  { id: 16, series: "Memory, Sorrow, and Thorn",         author: "Tad Williams",           isbn: "0886774845" },
+  { id: 17, series: "The Riftwar Saga",                  author: "Raymond E. Feist",       isbn: "0553564943" },
+  { id: 18, series: "The Earthsea Cycle",                author: "Ursula K. Le Guin",      isbn: "0553262505" },
+  { id: 19, series: "Chronicles of Amber",               author: "Roger Zelazny",          isbn: "0380809060" },
+  { id: 20, series: "The Chronicles of Thomas Covenant", author: "Stephen R. Donaldson",   isbn: "0345348656" },
   // Grimdark
-  { id: 19, title: "Prince of Thorns",              series: "The Broken Empire",                 author: "Mark Lawrence",          isbn: "0441020364" },
-  { id: 20, title: "The Darkness That Comes Before",series: "The Second Apocalypse",             author: "R. Scott Bakker",        isbn: "1585673765" },
-  { id: 21, title: "The Steel Remains",             series: "A Land Fit for Heroes",             author: "Richard K. Morgan",      isbn: "0345493966" },
-  { id: 22, title: "The Black Company",             series: "The Black Company",                 author: "Glen Cook",              isbn: "0812508181" },
-  { id: 23, title: "Best Served Cold",              series: "First Law World",                   author: "Joe Abercrombie",        isbn: "0575082097" },
-  { id: 24, title: "The Poppy War",                 series: "The Poppy War Trilogy",             author: "R.F. Kuang",             isbn: "0062662589" },
+  { id: 21, series: "The Broken Empire",                 author: "Mark Lawrence",          isbn: "0441020364" },
+  { id: 22, series: "The Second Apocalypse",             author: "R. Scott Bakker",        isbn: "1585673765" },
+  { id: 23, series: "A Land Fit for Heroes",             author: "Richard K. Morgan",      isbn: "0345493966" },
+  { id: 24, series: "The Black Company",                 author: "Glen Cook",              isbn: "0812508181" },
+  { id: 25, series: "The Poppy War Trilogy",             author: "R.F. Kuang",             isbn: "0062662589" },
+  { id: 26, series: "The Faithful and the Fallen",       author: "John Gwynne",            isbn: "0316248819" },
   // Progression Fantasy
-  { id: 25, title: "Unsouled",                      series: "Cradle",                            author: "Will Wight",             isbn: "0989671437" },
-  { id: 26, title: "Dungeon Crawler Carl",          series: "Dungeon Crawler Carl",              author: "Matt Dinniman",          isbn: "0593497953" },
-  { id: 27, title: "He Who Fights With Monsters",   series: "He Who Fights With Monsters",       author: "Jason Cheyne",           isbn: "9781647100421" },
+  { id: 27, series: "Dungeon Crawler Carl",              author: "Matt Dinniman",          isbn: "0593497953" },
+  { id: 28, series: "He Who Fights With Monsters",       author: "Jason Cheyne",           isbn: "9781647100421" },
   // Sci-Fantasy
-  { id: 28, title: "Red Rising",                    series: "The Red Rising Saga",               author: "Pierce Brown",           isbn: "034553980X" },
-  { id: 29, title: "The Fifth Season",              series: "The Broken Earth",                  author: "N.K. Jemisin",           isbn: "0316229296" },
-  { id: 30, title: "Dune",                          series: "Dune Chronicles",                   author: "Frank Herbert",          isbn: "0441172717" },
+  { id: 29, series: "The Broken Earth",                  author: "N.K. Jemisin",           isbn: "0316229296" },
+  { id: 30, series: "Dune Chronicles",                   author: "Frank Herbert",          isbn: "0441172717" },
   // More Fantasy
-  { id: 31, title: "The Way of Shadows",            series: "Night Angel",                       author: "Brent Weeks",            isbn: "0316033677" },
-  { id: 32, title: "Words of Radiance",             series: "The Stormlight Archive",            author: "Brandon Sanderson",      isbn: "0765326361" },
-  { id: 33, title: "Warbreaker",                    series: "Warbreaker",                        author: "Brandon Sanderson",      isbn: "0765360039" },
-  { id: 34, title: "Elantris",                      series: "Elantris",                          author: "Brandon Sanderson",      isbn: "0765311771" },
-  { id: 35, title: "Jonathan Strange & Mr Norrell", series: "Standalone",                        author: "Susanna Clarke",         isbn: "1582344167" },
-  { id: 36, title: "A Darker Shade of Magic",       series: "Shades of Magic",                   author: "V.E. Schwab",            isbn: "0765376466" },
-  { id: 37, title: "The Last Wish",                 series: "The Witcher Saga",                  author: "Andrzej Sapkowski",      isbn: "0316029181" },
-  { id: 38, title: "Empire of the Vampire",         series: "Empire of the Vampire",             author: "Jay Kristoff",           isbn: "1250267609" },
-  { id: 39, title: "Half a King",                   series: "Shattered Sea",                     author: "Joe Abercrombie",        isbn: "0307949044" },
-  { id: 40, title: "A Memory Called Empire",        series: "Teixcalaan",                        author: "Arkady Martine",         isbn: "1250186439" },
-  { id: 41, title: "The Goblin Emperor",            series: "Standalone",                        author: "Katherine Addison",      isbn: "0765336294" },
-  { id: 42, title: "Rhythm of War",                 series: "The Stormlight Archive",            author: "Brandon Sanderson",      isbn: "0765326388" },
-  { id: 43, title: "The Priory of the Orange Tree", series: "Standalone",                        author: "Samantha Shannon",       isbn: "1408872420" },
-  { id: 44, title: "Oathbringer",                   series: "The Stormlight Archive",            author: "Brandon Sanderson",      isbn: "0765326374" },
-  { id: 45, title: "The Once and Future King",      series: "Standalone",                        author: "T.H. White",             isbn: "0441627404" },
+  { id: 31, series: "Night Angel Trilogy",               author: "Brent Weeks",            isbn: "0316033677" },
+  { id: 32, series: "The Lightbringer Series",           author: "Brent Weeks",            isbn: "0316246255" },
+  { id: 33, series: "Shades of Magic",                   author: "V.E. Schwab",            isbn: "0765376466" },
+  { id: 34, series: "The Witcher Saga",                  author: "Andrzej Sapkowski",      isbn: "0316029181" },
+  { id: 35, series: "The Powder Mage Trilogy",           author: "Brian McClellan",        isbn: "031621903X" },
+  { id: 36, series: "The Riyria Revelations",            author: "Michael J. Sullivan",    isbn: "0316187747" },
+  { id: 37, series: "Empire of the Vampire",             author: "Jay Kristoff",           isbn: "1250267609" },
+  { id: 38, series: "Shattered Sea",                     author: "Joe Abercrombie",        isbn: "0307949044" },
+  { id: 39, series: "Teixcalaan",                        author: "Arkady Martine",         isbn: "1250186439" },
+  { id: 40, series: "Mistborn Era 2 (Wax & Wayne)",      author: "Brandon Sanderson",      isbn: "0765330363" },
+  { id: 41, series: "Warbreaker",                        author: "Brandon Sanderson",      isbn: "0765360039" },
+  { id: 42, series: "Tigana",                            author: "Guy Gavriel Kay",        isbn: "0451452836" },
+  { id: 43, series: "Jonathan Strange & Mr Norrell",     author: "Susanna Clarke",         isbn: "1582344167" },
+  { id: 44, series: "The Goblin Emperor",                author: "Katherine Addison",      isbn: "0765336294" },
+  { id: 45, series: "The Priory of the Orange Tree",     author: "Samantha Shannon",       isbn: "1408872420" },
   // Romantasy
-  { id: 46, title: "A Court of Thorns and Roses",   series: "ACOTAR",                            author: "Sarah J. Maas",          isbn: "1619634449" },
-  { id: 47, title: "Fourth Wing",                   series: "The Empyrean",                      author: "Rebecca Yarros",         isbn: "1649374046" },
-  { id: 48, title: "From Blood and Ash",            series: "Blood and Ash",                     author: "Jennifer L. Armentrout", isbn: "1952457327" },
-  { id: 49, title: "Throne of Glass",               series: "Throne of Glass",                   author: "Sarah J. Maas",          isbn: "1599906953" },
-  { id: 50, title: "House of Earth and Blood",      series: "Crescent City",                     author: "Sarah J. Maas",          isbn: "1635574048" },
+  { id: 46, series: "ACOTAR",                            author: "Sarah J. Maas",          isbn: "1619634449" },
+  { id: 47, series: "The Empyrean",                      author: "Rebecca Yarros",         isbn: "1649374046" },
+  { id: 48, series: "Blood and Ash",                     author: "Jennifer L. Armentrout", isbn: "1952457327" },
+  { id: 49, series: "Throne of Glass",                   author: "Sarah J. Maas",          isbn: "1599906953" },
+  { id: 50, series: "Crescent City",                     author: "Sarah J. Maas",          isbn: "1635574048" },
 ];
 
 // ──────────────────────────────────────────────
@@ -1117,22 +1119,20 @@ function makeItem(book, mode) {
   div.dataset.id   = book.id;
   div.dataset.mode = mode;
 
-  const label = book.series !== 'Standalone' ? book.series : book.title;
-
   div.innerHTML = `
     <div class="cover-wrap">
       <img class="cover-img"
            src="https://covers.openlibrary.org/b/isbn/${book.isbn}-M.jpg"
-           alt="${x(book.title)}"
+           alt="${x(book.series)}"
            loading="lazy"
            onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
       <div class="cover-ph">
-        <span class="pht">${x(book.title)}</span>
+        <span class="pht">${x(book.series)}</span>
         <span class="pha">${x(book.author)}</span>
       </div>
       <div class="chk">&#10003;</div>
     </div>
-    <div class="book-lbl"  title="${x(label)}">${x(label)}</div>
+    <div class="book-lbl"  title="${x(book.series)}">${x(book.series)}</div>
     <div class="book-auth" title="${x(book.author)}">${x(book.author)}</div>
   `;
 
@@ -1206,8 +1206,8 @@ function updateOracleState() {
 // CONSULT THE ORACLE
 // ──────────────────────────────────────────────
 async function consultOracle() {
-  const lovedList    = buildList(loved,    'loved');
-  const rejectedList = buildList(rejected, 'rejected');
+  const lovedList    = buildList(loved);
+  const rejectedList = buildList(rejected);
 
   // Merge manual entries
   const manL = document.getElementById('manual-loved').value.trim();
@@ -1231,7 +1231,7 @@ async function consultOracle() {
         'anthropic-dangerous-direct-browser-access': 'true'
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-3-5-sonnet-20241022',
         max_tokens: 2400,
         system,
         messages: [{ role: 'user', content: user }]
@@ -1256,13 +1256,10 @@ async function consultOracle() {
   }
 }
 
-function buildList(set, mode) {
+function buildList(set) {
   return [...set].map(id => {
     const b = BOOKS.find(bk => bk.id === id);
-    if (!b) return null;
-    return b.series !== 'Standalone'
-      ? `${b.series} by ${b.author}`
-      : `${b.title} by ${b.author}`;
+    return b ? `${b.series} by ${b.author}` : null;
   }).filter(Boolean);
 }
 
