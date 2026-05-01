@@ -327,6 +327,20 @@ body { background: var(--mahogany); color: var(--ink); font-family: var(--body);
 .card-genre { display:inline-block; font-family:var(--body); font-style:italic; font-size:0.77rem; color:rgba(44,26,14,0.55); border-bottom:1px solid rgba(44,26,14,0.2); padding-bottom:1px; }
 .card-genre::before{content:'⟨ ';opacity:0.45} .card-genre::after{content:' ⟩';opacity:0.45}
 
+.card-footer { display:flex; align-items:center; justify-content:space-between; margin-top:0.65rem; flex-wrap:wrap; gap:0.4rem; }
+.read-btn {
+  font-family:var(--mono); font-size:0.66rem; letter-spacing:0.1em; text-transform:uppercase;
+  color:rgba(44,26,14,0.42); background:transparent; border:1px solid rgba(44,26,14,0.2);
+  padding:0.22rem 0.7rem; cursor:pointer; transition:background 0.18s,color 0.18s,border-color 0.18s;
+  outline:none; flex-shrink:0;
+}
+.read-btn:hover { background:rgba(44,26,14,0.08); color:rgba(44,26,14,0.7); border-color:rgba(44,26,14,0.35); }
+
+@keyframes cardOut { from{opacity:1;transform:translateY(0) scale(1)} to{opacity:0;transform:translateY(-10px) scale(0.97)} }
+@keyframes cardIn  { from{opacity:0;transform:translateY(12px) scale(0.97)} to{opacity:1;transform:translateY(0) scale(1)} }
+.ccard.anim-out { animation:cardOut 0.28s ease forwards; }
+.ccard.anim-in  { animation:cardIn  0.32s ease forwards; }
+
 .another-round { text-align:center; padding:1.5rem 0 3rem; }
 .round-btn { font-family:var(--serif); font-size:0.93rem; letter-spacing:0.07em; color:var(--mahogany); background:transparent; border:1px solid rgba(44,26,14,0.28); padding:0.68rem 2.1rem; cursor:pointer; transition:background 0.18s,color 0.18s; outline:none; }
 .round-btn:hover { background:var(--mahogany); color:var(--parchment); border-color:var(--mahogany); }
@@ -796,7 +810,7 @@ async function consultOracle() {
 
   const system = `You are a fantasy literature expert and librarian with encyclopedic knowledge of fantasy series. Recommend series based purely on the reader's taste profile — if they lean romantasy, reflect that; if grimdark or epic, reflect that. Respond only in valid JSON.`;
 
-  const user = `A reader enjoys: ${loved.join(', ')}. They did not enjoy: ${rejected.length ? rejected.join(', ') : 'nothing specified'}. Recommend exactly 8 fantasy series not already listed. Return a JSON array where each object has: { "title": string, "author": string, "books_in_series": integer, "is_complete": boolean, "one_sentence_description": string, "why_this_reader": string, "subgenre": string }.`;
+  const user = `A reader enjoys: ${loved.join(', ')}. They did not enjoy: ${rejected.length ? rejected.join(', ') : 'nothing specified'}. Recommend exactly 15 fantasy series not already listed, ordered from best match to good match. Return a JSON array where each object has: { "title": string, "author": string, "books_in_series": integer, "is_complete": boolean, "one_sentence_description": string, "why_this_reader": string, "subgenre": string }.`;
 
   try {
     let res;
@@ -879,35 +893,74 @@ function requestAnotherRound() {
 }
 
 // ── RENDER CARDS ───────────────────────────────────────────
+let recReserve = [];
+
+function buildCard(rec) {
+  const done    = Boolean(rec.is_complete);
+  const books   = Math.max(1, parseInt(rec.books_in_series) || 1);
+  const volText = done
+    ? (books === 1 ? 'Standalone' : `Vol. 1–${books}`)
+    : `Vol. 1–${books} (ongoing)`;
+  const card = document.createElement('div');
+  card.className = 'ccard';
+  card.innerHTML = `
+    <div class="card-num">--</div>
+    <div class="card-top">
+      <div class="card-meta">
+        <div class="card-title">${esc(rec.title)}</div>
+        <div class="card-author">${esc(rec.author)}</div>
+        <div class="card-vols">${esc(volText)}</div>
+      </div>
+      <div class="stamp ${done ? 'stamp-c' : 'stamp-o'}">${done ? 'COMPLETE' : 'ONGOING'}</div>
+    </div>
+    <div class="card-desc">${esc(rec.one_sentence_description)}</div>
+    <div class="card-why"><span class="why-label">Why you&rsquo;ll like this</span>${esc(rec.why_this_reader)}</div>
+    <div class="card-footer">
+      <div class="card-genre">${esc(rec.subgenre)}</div>
+      <button class="read-btn" onclick="markRead(this)">Already Read</button>
+    </div>
+  `;
+  return card;
+}
+
+function renumberCards() {
+  const stack = document.getElementById('catalog-stack');
+  [...stack.querySelectorAll('.ccard')].forEach((c, i) => {
+    c.querySelector('.card-num').textContent = String(i + 1).padStart(2, '0');
+  });
+}
+
+function markRead(btn) {
+  const card = btn.closest('.ccard');
+  const stack = document.getElementById('catalog-stack');
+  btn.disabled = true;
+
+  if (recReserve.length > 0) {
+    const next = recReserve.shift();
+    const newCard = buildCard(next);
+    newCard.classList.add('anim-in');
+
+    card.classList.add('anim-out');
+    card.addEventListener('animationend', () => {
+      stack.replaceChild(newCard, card);
+      renumberCards();
+    }, { once: true });
+  } else {
+    card.classList.add('anim-out');
+    card.addEventListener('animationend', () => {
+      card.remove();
+      renumberCards();
+    }, { once: true });
+  }
+}
+
 function renderResults(recs) {
+  recReserve = recs.slice(10);
+  const visible = recs.slice(0, 10);
   const stack = document.getElementById('catalog-stack');
   stack.innerHTML = '';
-  recs.forEach((rec, i) => {
-    const n       = String(i + 1).padStart(2, '0');
-    const done    = Boolean(rec.is_complete);
-    const books   = Math.max(1, parseInt(rec.books_in_series) || 1);
-    const volText = done
-      ? (books === 1 ? 'Standalone' : `Vol. 1–${books}`)
-      : `Vol. 1–${books} (ongoing)`;
-
-    const card = document.createElement('div');
-    card.className = 'ccard';
-    card.innerHTML = `
-      <div class="card-num">${n}</div>
-      <div class="card-top">
-        <div class="card-meta">
-          <div class="card-title">${esc(rec.title)}</div>
-          <div class="card-author">${esc(rec.author)}</div>
-          <div class="card-vols">${esc(volText)}</div>
-        </div>
-        <div class="stamp ${done ? 'stamp-c' : 'stamp-o'}">${done ? 'COMPLETE' : 'ONGOING'}</div>
-      </div>
-      <div class="card-desc">${esc(rec.one_sentence_description)}</div>
-      <div class="card-why"><span class="why-label">Why you&rsquo;ll like this</span>${esc(rec.why_this_reader)}</div>
-      <div class="card-genre">${esc(rec.subgenre)}</div>
-    `;
-    stack.appendChild(card);
-  });
+  visible.forEach(rec => stack.appendChild(buildCard(rec)));
+  renumberCards();
   setTimeout(() => document.getElementById('results').scrollIntoView({ behavior:'smooth', block:'start' }), 80);
 }
 </script>
