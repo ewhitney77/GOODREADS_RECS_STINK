@@ -1629,8 +1629,23 @@ async function consultOracle() {
     let recs;
     try {
       const stripped = text.replace(/```(?:json)?/gi, '').trim();
-      const m = stripped.match(/\[[\s\S]*\]/);
-      const raw = m ? m[0] : stripped;
+      const start = stripped.indexOf('[');
+      if (start === -1) throw new Error('No array found');
+
+      // Walk forward, balancing brackets while respecting strings, to find
+      // the array's proper closing ].
+      let depth = 0, inStr = false, escape = false, end = -1;
+      for (let i = start; i < stripped.length; i++) {
+        const c = stripped[i];
+        if (escape) { escape = false; continue; }
+        if (c === '\\') { escape = true; continue; }
+        if (c === '"') { inStr = !inStr; continue; }
+        if (inStr) continue;
+        if (c === '[') depth++;
+        else if (c === ']') { depth--; if (depth === 0) { end = i; break; } }
+      }
+
+      const raw = end !== -1 ? stripped.slice(start, end + 1) : stripped.slice(start);
       try {
         recs = JSON.parse(raw);
       } catch(e) {
