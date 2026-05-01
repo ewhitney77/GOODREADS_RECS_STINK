@@ -345,11 +345,39 @@ body { background: var(--mahogany); color: var(--ink); font-family: var(--body);
 .round-btn { font-family:var(--serif); font-size:0.93rem; letter-spacing:0.07em; color:var(--mahogany); background:transparent; border:1px solid rgba(44,26,14,0.28); padding:0.68rem 2.1rem; cursor:pointer; transition:background 0.18s,color 0.18s; outline:none; }
 .round-btn:hover { background:var(--mahogany); color:var(--parchment); border-color:var(--mahogany); }
 
+/* ── GOODREADS SECTION ───────────────────────────────────── */
+.gr-zone { background:rgba(26,16,8,0.04); border-top:1px solid rgba(44,26,14,0.1); border-bottom:1px solid rgba(44,26,14,0.1); padding:1.8rem 0 2rem; margin-top:0.5rem; }
+.gr-toggle { display:flex; align-items:center; gap:0.75rem; cursor:pointer; user-select:none; font-family:var(--serif); font-size:0.9rem; color:rgba(44,26,14,0.52); margin-bottom:0; }
+.gr-toggle input[type=checkbox] { width:1rem; height:1rem; accent-color:var(--amber); cursor:pointer; flex-shrink:0; }
+.gr-toggle-label { font-family:var(--serif); font-size:0.9rem; color:rgba(44,26,14,0.6); }
+.gr-toggle-label strong { color:var(--mahogany); font-weight:600; }
+.gr-body { margin-top:1.3rem; }
+.gr-dropzone {
+  border:2px dashed rgba(44,26,14,0.22); padding:2rem 1.5rem; text-align:center;
+  cursor:pointer; transition:border-color 0.18s, background 0.18s; position:relative;
+}
+.gr-dropzone:hover, .gr-dropzone.drag-over { border-color:var(--amber); background:rgba(212,146,42,0.04); }
+.gr-dropzone input[type=file] { position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; height:100%; }
+.gr-dz-icon { font-size:1.6rem; margin-bottom:0.5rem; opacity:0.4; }
+.gr-dz-text { font-family:var(--body); font-style:italic; font-size:0.95rem; color:rgba(44,26,14,0.52); }
+.gr-dz-sub  { font-family:var(--mono); font-size:0.7rem; color:rgba(44,26,14,0.32); margin-top:0.3rem; }
+.gr-summary {
+  margin-top:1.1rem; padding:1rem 1.2rem; background:#faf4e1;
+  border:1px solid rgba(44,26,14,0.14); font-family:var(--mono); font-size:0.78rem;
+  color:var(--ink); line-height:1.7;
+}
+.gr-summary-row { display:flex; gap:0.5rem; align-items:baseline; }
+.gr-sum-label { color:rgba(44,26,14,0.45); min-width:9rem; }
+.gr-sum-val   { color:var(--mahogany); font-weight:700; }
+.gr-clear-btn { font-family:var(--mono); font-size:0.66rem; letter-spacing:0.08em; text-transform:uppercase; color:rgba(44,26,14,0.38); background:transparent; border:none; cursor:pointer; margin-top:0.6rem; padding:0; text-decoration:underline; }
+.gr-clear-btn:hover { color:var(--red-stamp); }
+
 .hidden { display:none!important; }
 
 @media(max-width:600px){
   .wrap{padding:0 1rem}
   .rejected-zone{margin:0 -1rem;padding-left:1rem;padding-right:1rem}
+  .gr-zone{margin-left:-1rem;margin-right:-1rem;padding-left:1rem;padding-right:1rem}
   .ccard{padding:1.15rem 1.2rem 1.1rem 1.5rem}
   .ccard::after{left:30px}
   .oracle-btn{font-size:1rem;padding:0.92rem 2rem}
@@ -440,6 +468,25 @@ body { background: var(--mahogany); color: var(--ink); font-family: var(--body);
         <p class="sub">Series that disappointed you. Up to five.</p>
       </section>
       <div class="slots" id="rejected-slots"></div>
+    </div>
+  </div>
+
+  <!-- GOODREADS IMPORT (optional) -->
+  <div class="gr-zone">
+    <div class="wrap">
+      <label class="gr-toggle">
+        <input type="checkbox" id="gr-toggle-cb" onchange="toggleGrBody()">
+        <span class="gr-toggle-label"><strong>Enhance with Goodreads data</strong> &mdash; optional. Upload your export to avoid books you&rsquo;ve already read and sharpen recommendations.</span>
+      </label>
+      <div class="gr-body hidden" id="gr-body">
+        <div class="gr-dropzone" id="gr-dropzone">
+          <input type="file" id="gr-file-input" accept=".csv" onchange="handleGrFile(this.files[0])">
+          <div class="gr-dz-icon">📚</div>
+          <div class="gr-dz-text">Drop your Goodreads export here, or click to browse</div>
+          <div class="gr-dz-sub">goodreads_library_export.csv &middot; never leaves your browser</div>
+        </div>
+        <div id="gr-summary" class="gr-summary hidden"></div>
+      </div>
     </div>
   </div>
 
@@ -785,6 +832,118 @@ function getSlotValues(containerId) {
     .filter(Boolean);
 }
 
+// ── GOODREADS IMPORT ───────────────────────────────────────
+let grData = null; // { read: string[], loved: string[], disliked: string[] }
+
+function toggleGrBody() {
+  const cb = document.getElementById('gr-toggle-cb');
+  document.getElementById('gr-body').classList.toggle('hidden', !cb.checked);
+}
+
+// Drag-and-drop
+(function() {
+  document.addEventListener('DOMContentLoaded', () => {
+    const dz = document.getElementById('gr-dropzone');
+    if (!dz) return;
+    dz.addEventListener('dragover',  e => { e.preventDefault(); dz.classList.add('drag-over'); });
+    dz.addEventListener('dragleave', () => dz.classList.remove('drag-over'));
+    dz.addEventListener('drop', e => {
+      e.preventDefault(); dz.classList.remove('drag-over');
+      const f = e.dataTransfer.files[0];
+      if (f) handleGrFile(f);
+    });
+  });
+})();
+
+function handleGrFile(file) {
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => parseGrCsv(e.target.result);
+  reader.readAsText(file);
+}
+
+function parseGrCsv(text) {
+  const lines = text.split(/\r?\n/);
+  if (lines.length < 2) return;
+
+  // Parse header
+  const header = parseCsvRow(lines[0]);
+  const idx = name => header.findIndex(h => h.toLowerCase().includes(name.toLowerCase()));
+  const iTitle  = idx('title');
+  const iAuthor = idx('author');
+  const iRating = idx('my rating');
+  const iShelf  = idx('exclusive shelf');
+
+  if (iTitle === -1) { showGrError('Could not find a Title column — is this a Goodreads export?'); return; }
+
+  const read = [], loved = [], disliked = [];
+
+  for (let i = 1; i < lines.length; i++) {
+    if (!lines[i].trim()) continue;
+    const row    = parseCsvRow(lines[i]);
+    const title  = (row[iTitle]  || '').trim();
+    const author = (row[iAuthor] || '').trim();
+    const rating = parseInt(row[iRating]) || 0;
+    const shelf  = (row[iShelf]  || '').toLowerCase();
+
+    if (!title) continue;
+    const entry = author ? `${title} by ${author}` : title;
+
+    if (shelf === 'read') {
+      read.push(entry);
+      if (rating >= 4) loved.push(entry);
+      if (rating <= 2 && rating > 0) disliked.push(entry);
+    }
+  }
+
+  grData = { read, loved, disliked };
+  showGrSummary(read.length, loved.length, disliked.length);
+}
+
+function parseCsvRow(line) {
+  const cols = [];
+  let cur = '', inQ = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (ch === '"') {
+      if (inQ && line[i+1] === '"') { cur += '"'; i++; }
+      else inQ = !inQ;
+    } else if (ch === ',' && !inQ) {
+      cols.push(cur); cur = '';
+    } else {
+      cur += ch;
+    }
+  }
+  cols.push(cur);
+  return cols;
+}
+
+function showGrSummary(total, loved, disliked) {
+  const el = document.getElementById('gr-summary');
+  el.classList.remove('hidden');
+  el.innerHTML = `
+    <div class="gr-summary-row"><span class="gr-sum-label">Books read</span><span class="gr-sum-val">${total}</span></div>
+    <div class="gr-summary-row"><span class="gr-sum-label">Highly rated (4–5★)</span><span class="gr-sum-val">${loved}</span></div>
+    <div class="gr-summary-row"><span class="gr-sum-label">Low rated (1–2★)</span><span class="gr-sum-val">${disliked}</span></div>
+    <div class="gr-summary-row"><span class="gr-sum-label">Status</span><span class="gr-sum-val" style="color:#2D5016">Ready — Oracle will avoid books you&rsquo;ve read</span></div>
+    <button class="gr-clear-btn" onclick="clearGrData()">Remove export</button>
+  `;
+}
+
+function showGrError(msg) {
+  const el = document.getElementById('gr-summary');
+  el.classList.remove('hidden');
+  el.innerHTML = `<span style="color:var(--red-stamp);font-family:var(--mono);font-size:0.78rem">${msg}</span>`;
+}
+
+function clearGrData() {
+  grData = null;
+  const el = document.getElementById('gr-summary');
+  el.classList.add('hidden');
+  el.innerHTML = '';
+  document.getElementById('gr-file-input').value = '';
+}
+
 // ── PERSIST SELECTIONS ─────────────────────────────────────
 function saveSlots() {
   ['loved-slots', 'rejected-slots'].forEach(id => {
@@ -842,7 +1001,16 @@ async function consultOracle() {
 
   const system = `You are a fantasy literature expert and librarian with encyclopedic knowledge of fantasy series. Recommend series based purely on the reader's taste profile — if they lean romantasy, reflect that; if grimdark or epic, reflect that. Respond only in valid JSON.`;
 
-  const user = `A reader enjoys: ${loved.join(', ')}. They did not enjoy: ${rejected.length ? rejected.join(', ') : 'nothing specified'}. Recommend exactly 15 fantasy series not already listed, ordered from best match to good match. Return a JSON array where each object has: { "title": string, "author": string, "books_in_series": integer, "is_complete": boolean, "one_sentence_description": string, "why_this_reader": string, "subgenre": string }.`;
+  let grContext = '';
+  if (grData && grData.read.length > 0) {
+    grContext += ` The reader has already read the following books — do NOT recommend any of these or their series: ${grData.read.slice(0, 120).join('; ')}.`;
+    if (grData.loved.length > 0)
+      grContext += ` Books they rated 4–5 stars (strong taste signal): ${grData.loved.slice(0, 40).join('; ')}.`;
+    if (grData.disliked.length > 0)
+      grContext += ` Books they rated 1–2 stars (disliked): ${grData.disliked.slice(0, 20).join('; ')}.`;
+  }
+
+  const user = `A reader enjoys these series: ${loved.join(', ')}. They did not enjoy: ${rejected.length ? rejected.join(', ') : 'nothing specified'}.${grContext} Recommend exactly 15 fantasy series not already listed above, ordered from best match to good match. Return a JSON array where each object has: { "title": string, "author": string, "books_in_series": integer, "is_complete": boolean, "one_sentence_description": string, "why_this_reader": string, "subgenre": string }.`;
 
   try {
     let res;
