@@ -579,6 +579,7 @@ function clearKey() { localStorage.removeItem('anthropic_key'); }
 window.addEventListener('DOMContentLoaded', () => {
   buildSlots('loved-slots',    10, 'loved');
   buildSlots('rejected-slots', 5,  'rejected');
+  restoreSlots();
   updateOracleState();
 
   if (!getKey()) {
@@ -683,6 +684,7 @@ function makeSlot(index, mode) {
     input.value = '';
     input.focus();
     updateOracleState();
+    saveSlots();
   });
 
   locked.appendChild(lockedName);
@@ -702,11 +704,14 @@ function makeSlot(index, mode) {
     inputWrap.style.display = 'none';
     dropdown.classList.remove('open');
     updateOracleState();
+    saveSlots();
     // Focus next empty slot
     const allInputs = [...document.querySelectorAll(`#${mode === 'loved' ? 'loved-slots' : 'rejected-slots'} .slot-input`)];
     const nextInput = allInputs.find(el => el.closest('.slot-field').querySelector('.slot-locked').style.display === 'none' && el !== input);
     if (nextInput) nextInput.focus();
   }
+
+  wrap._lock = lockSlot;
 
   // Autocomplete
   let activeIdx = -1;
@@ -778,6 +783,33 @@ function getSlotValues(containerId) {
   return [...document.querySelectorAll(`#${containerId} .slot-locked-name`)]
     .map(el => el.textContent.trim())
     .filter(Boolean);
+}
+
+// ── PERSIST SELECTIONS ─────────────────────────────────────
+function saveSlots() {
+  ['loved-slots', 'rejected-slots'].forEach(id => {
+    const data = [...document.querySelectorAll(`#${id} .slot`)].map(slot => {
+      const lk = slot.querySelector('.slot-locked');
+      if (lk && lk.style.display === 'flex') {
+        return {
+          s: slot.querySelector('.slot-locked-name').textContent,
+          a: slot.querySelector('.slot-locked-author').textContent.replace(/^— /, '')
+        };
+      }
+      return null;
+    }).filter(Boolean);
+    localStorage.setItem('oracle_' + id, JSON.stringify(data));
+  });
+}
+
+function restoreSlots() {
+  try {
+    ['loved-slots', 'rejected-slots'].forEach(id => {
+      const saved = JSON.parse(localStorage.getItem('oracle_' + id) || '[]');
+      const slots = [...document.querySelectorAll(`#${id} .slot`)];
+      saved.forEach((item, i) => { if (slots[i] && item) slots[i]._lock(item.s, item.a); });
+    });
+  } catch(e) { /* ignore corrupt data */ }
 }
 
 // ── ORACLE STATE ───────────────────────────────────────────
