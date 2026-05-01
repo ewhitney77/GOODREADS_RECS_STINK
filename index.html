@@ -27,26 +27,76 @@
 html { font-size: 16px; scroll-behavior: smooth; }
 body { background: var(--mahogany); color: var(--ink); font-family: var(--body); min-height: 100vh; overflow-x: hidden; }
 
-/* ── LOADING ─────────────────────────────────────────────── */
+/* ── LOADING / DOOR INTRO ────────────────────────────────── */
 #loading {
   position: fixed; inset: 0; z-index: 9999;
-  background: #060302;
-  display: flex; align-items: center; justify-content: center; flex-direction: column;
-  overflow: hidden; transition: opacity 1.1s ease;
+  background: #0a0503;
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden; transition: opacity 1.2s ease;
 }
 #loading.fade-out { opacity: 0; pointer-events: none; }
 
-.shelf-bg {
-  position: absolute; inset: 0;
-  background:
-    repeating-linear-gradient(0deg, transparent, transparent 112px, rgba(55,32,12,0.55) 112px, rgba(55,32,12,0.55) 120px),
-    linear-gradient(180deg, #060302 0%, #0f0703 50%, #060302 100%);
+.door-scene {
+  position: relative; width: 100vw; height: 100vh;
+  perspective: 1100px; perspective-origin: 50% 50%;
+  display: flex; align-items: center; justify-content: center;
 }
-.shelf-bg::before {
-  content: ''; position: absolute; inset: 0;
-  background-image: repeating-linear-gradient(90deg, transparent 0, transparent 14px, rgba(30,15,5,0.25) 14px, rgba(30,15,5,0.25) 15px);
-  opacity: 0.6;
+.door-surround {
+  position: absolute;
+  width: min(420px, 88vw); height: min(580px, 88vh);
+  border: 6px solid #6B4C2A;
+  box-shadow: 0 0 0 3px #3a2510, 0 0 40px rgba(180,110,30,0.35), inset 0 0 30px rgba(0,0,0,0.6);
+  background: #1a0d05;
+  display: flex; overflow: hidden;
 }
+.door {
+  width: 50%; height: 100%; position: relative;
+  transform-style: preserve-3d;
+  transition: transform 1.6s cubic-bezier(0.4, 0, 0.2, 1);
+  background: linear-gradient(135deg, #7B5230 0%, #5C3A1E 40%, #7B5230 70%, #4A2E14 100%);
+  overflow: hidden;
+}
+.door-left  { transform-origin: left center; border-right: 2px solid #3a2510; }
+.door-right { transform-origin: right center; border-left: 2px solid #3a2510; }
+.door-left.open  { transform: rotateY(-115deg); }
+.door-right.open { transform: rotateY(115deg); }
+
+.door-panel {
+  position: absolute; border: 3px solid rgba(255,200,100,0.18);
+  box-shadow: inset 0 0 8px rgba(0,0,0,0.4);
+}
+.door-panel-top    { top:8%; left:10%; right:10%; height:35%; }
+.door-panel-bottom { top:50%; left:10%; right:10%; height:42%; }
+
+.door-grain {
+  position: absolute; inset: 0; opacity: 0.08;
+  background: repeating-linear-gradient(90deg, transparent, transparent 3px, rgba(255,255,255,0.6) 3px, rgba(255,255,255,0.6) 4px);
+}
+.door-handle-l { position: absolute; top: 50%; right: 14%; transform: translateY(-50%); }
+.door-handle-r { position: absolute; top: 50%; left:  14%; transform: translateY(-50%); }
+.door-handle-l svg, .door-handle-r svg { display: block; }
+
+.door-glow {
+  position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(ellipse at center, rgba(220,160,50,0.08) 0%, transparent 70%);
+}
+
+.door-title {
+  position: absolute; bottom: -3rem; left: 50%; transform: translateX(-50%);
+  font-family: 'Playfair Display', Georgia, serif; font-size: clamp(1rem, 2.5vw, 1.4rem);
+  color: rgba(245,230,200,0.55); letter-spacing: 0.25em; text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* warm light behind the doors */
+.door-light {
+  position: absolute; inset: 0; z-index: -1;
+  background: radial-gradient(ellipse at center, #3D1F00 0%, #0a0503 65%);
+}
+
+/* ambient candle flicker on light source */
+@keyframes flicker { 0%,100%{opacity:1} 45%{opacity:0.8} 60%{opacity:0.95} 75%{opacity:0.78} }
+.door-light { animation: flicker 3s ease-in-out infinite; }
 
 .lc {
   position: absolute; width: 108px; height: 162px; object-fit: cover;
@@ -345,7 +395,103 @@ body { background: var(--mahogany); color: var(--ink); font-family: var(--body);
 .round-btn { font-family:var(--serif); font-size:0.93rem; letter-spacing:0.07em; color:var(--mahogany); background:transparent; border:1px solid rgba(44,26,14,0.28); padding:0.68rem 2.1rem; cursor:pointer; transition:background 0.18s,color 0.18s; outline:none; }
 .round-btn:hover { background:var(--mahogany); color:var(--parchment); border-color:var(--mahogany); }
 
-/* ── GOODREADS SECTION ───────────────────────────────────── */
+/* ── LOCAL BOOKSTORES ────────────────────────────────────── */
+.bookstores-section { max-width:840px; margin:0 auto; padding:0 1rem 3rem; }
+.bookstores-head { text-align:center; padding:1.5rem 0 1rem; }
+.bookstores-head h3 { font-family:var(--serif); font-size:1.4rem; font-weight:700; color:var(--mahogany); }
+.bookstores-head p  { font-family:var(--body); font-style:italic; color:rgba(44,26,14,0.5); font-size:0.9rem; margin-top:0.3rem; }
+.locate-btn {
+  display:block; margin:0 auto 1.2rem;
+  font-family:var(--serif); font-size:0.9rem; letter-spacing:0.06em;
+  color:var(--mahogany); background:transparent; border:1px solid rgba(44,26,14,0.28);
+  padding:0.58rem 1.8rem; cursor:pointer; transition:background 0.18s,color 0.18s;
+}
+.locate-btn:hover { background:var(--mahogany); color:var(--parchment); }
+.locate-btn:disabled { opacity:0.45; cursor:default; }
+.bs-list { display:flex; flex-direction:column; gap:0.8rem; }
+.bs-card {
+  background:#faf4e1; border:1px solid rgba(44,26,14,0.14);
+  padding:0.9rem 1.2rem; position:relative;
+}
+.bs-card::after { content:''; position:absolute; left:40px; top:0; bottom:0; width:1px; background:rgba(155,45,45,0.15); }
+.bs-name    { font-family:var(--mono); font-size:0.92rem; font-weight:700; color:var(--ink); }
+.bs-addr    { font-family:var(--body); font-style:italic; font-size:0.82rem; color:rgba(44,26,14,0.55); margin-top:0.2rem; }
+.bs-dist    { font-family:var(--mono); font-size:0.68rem; color:rgba(44,26,14,0.38); margin-top:0.15rem; }
+.bs-msg     { font-family:var(--body); font-style:italic; font-size:0.88rem; color:rgba(44,26,14,0.45); text-align:center; padding:0.8rem 0; }
+
+/* ── PROFILE SCREEN ──────────────────────────────────────── */
+#profile-screen {
+  display:none; position:fixed; inset:0; z-index:9000;
+  background: linear-gradient(160deg,#1a0c05 0%,#2C1A0E 60%,#1a0c05 100%);
+  align-items:center; justify-content:center; flex-direction:column;
+}
+.ps-inner {
+  width:min(460px,90vw); padding:3rem 2.5rem 2.5rem;
+  background:#faf4e1; border:1px solid rgba(44,26,14,0.2);
+  box-shadow:0 8px 48px rgba(0,0,0,0.5);
+}
+.ps-title { font-family:var(--serif); font-size:1.8rem; font-weight:700; color:var(--mahogany); text-align:center; margin-bottom:0.25rem; }
+.ps-sub   { font-family:var(--body); font-style:italic; color:rgba(44,26,14,0.5); text-align:center; font-size:0.95rem; margin-bottom:2rem; }
+.ps-rule  { display:flex; align-items:center; gap:0.7rem; margin-bottom:1.5rem; }
+.ps-rule-line { flex:1; height:1px; background:rgba(44,26,14,0.15); }
+.ps-section-label { font-family:var(--mono); font-size:0.65rem; letter-spacing:0.15em; text-transform:uppercase; color:rgba(44,26,14,0.38); }
+.profile-list { display:flex; flex-direction:column; gap:0.55rem; margin-bottom:1.5rem; max-height:220px; overflow-y:auto; }
+.profile-entry {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:0.65rem 0.9rem; background:#fff8e8; border:1px solid rgba(44,26,14,0.15);
+  cursor:pointer; transition:background 0.15s,border-color 0.15s;
+}
+.profile-entry:hover { background:#f0e8d0; border-color:var(--amber); }
+.profile-entry-name { font-family:var(--serif); font-size:1rem; color:var(--mahogany); }
+.profile-entry-meta { font-family:var(--mono); font-size:0.65rem; color:rgba(44,26,14,0.4); }
+.profile-delete { background:none; border:none; color:rgba(44,26,14,0.28); cursor:pointer; font-size:1rem; padding:0 0.2rem; line-height:1; transition:color 0.15s; }
+.profile-delete:hover { color:var(--red-stamp); }
+.ps-new { display:flex; gap:0.5rem; }
+.ps-new input { flex:1; font-family:var(--serif); font-size:0.95rem; color:var(--ink); background:#fff8e8; border:1px solid rgba(44,26,14,0.22); padding:0.55rem 0.8rem; outline:none; }
+.ps-new input:focus { border-color:var(--amber); }
+.ps-new button { font-family:var(--serif); font-size:0.9rem; background:var(--mahogany); color:var(--parchment); border:none; padding:0.55rem 1.1rem; cursor:pointer; white-space:nowrap; transition:background 0.15s; }
+.ps-new button:hover { background:#3d2512; }
+.ps-err { font-family:var(--mono); font-size:0.72rem; color:var(--red-stamp); margin-top:0.4rem; min-height:1rem; }
+
+/* Profile badge in app header */
+.profile-badge {
+  position:fixed; top:0.8rem; right:1.2rem; z-index:100;
+  display:flex; align-items:center; gap:0.5rem;
+  font-family:var(--mono); font-size:0.68rem; color:rgba(245,230,200,0.6);
+  background:rgba(44,26,14,0.7); padding:0.3rem 0.7rem; border:1px solid rgba(212,146,42,0.25);
+  backdrop-filter:blur(4px);
+}
+.profile-badge button { background:none; border:none; color:rgba(245,230,200,0.5); cursor:pointer; font-family:var(--mono); font-size:0.68rem; padding:0; text-decoration:underline; }
+.profile-badge button:hover { color:var(--amber); }
+
+/* ── EASTER EGGS ─────────────────────────────────────────── */
+.ee-overlay {
+  position:fixed; inset:0; pointer-events:none; z-index:8000; overflow:hidden;
+}
+/* Lightning */
+@keyframes bolt-flash { 0%{opacity:0} 10%{opacity:1} 20%{opacity:0.3} 30%{opacity:1} 50%{opacity:0} 100%{opacity:0} }
+@keyframes sky-flash  { 0%{opacity:0} 8%{opacity:0.18} 12%{opacity:0} 28%{opacity:0.12} 35%{opacity:0} 100%{opacity:0} }
+.ee-lightning-sky { position:absolute; inset:0; background:#7ab8ff; animation:sky-flash 2.4s ease forwards; }
+.ee-bolt { position:absolute; top:0; animation:bolt-flash 2.4s ease forwards; }
+
+/* Wolf */
+@keyframes wolf-run { from{transform:translateX(-160px)} to{transform:translateX(110vw)} }
+@keyframes wolf-howl { 0%,60%{transform:translateX(-160px)} 100%{transform:translateX(110vw)} }
+.ee-wolf { position:absolute; bottom:18%; animation:wolf-run 2.6s cubic-bezier(0.4,0,0.6,1) forwards; }
+
+/* Dragon */
+@keyframes dragon-fly {
+  0%   {transform:translateX(-200px) translateY(0) scaleX(1)}
+  40%  {transform:translateX(40vw) translateY(-60px) scaleX(1)}
+  100% {transform:translateX(110vw) translateY(20px) scaleX(1)}
+}
+.ee-dragon { position:absolute; top:20%; animation:dragon-fly 3s ease-in-out forwards; }
+
+/* ACOTAR */
+@keyframes vomit-bounce { 0%{transform:scale(0) rotate(-20deg)} 30%{transform:scale(1.3) rotate(5deg)} 50%{transform:scale(1) rotate(-3deg)} 70%{transform:scale(1.1) rotate(2deg)} 85%{transform:scale(1) rotate(0)} 100%{transform:scale(0) rotate(10deg);opacity:0} }
+.ee-acotar { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-size:7rem; animation:vomit-bounce 2.2s ease forwards; line-height:1; }
+
+
 .gr-zone { background:rgba(26,16,8,0.04); border-top:1px solid rgba(44,26,14,0.1); border-bottom:1px solid rgba(44,26,14,0.1); padding:1.8rem 0 2rem; margin-top:0.5rem; }
 .gr-toggle { display:flex; align-items:center; gap:0.75rem; cursor:pointer; user-select:none; font-family:var(--serif); font-size:0.9rem; color:rgba(44,26,14,0.52); margin-bottom:0; }
 .gr-toggle input[type=checkbox] { width:1rem; height:1rem; accent-color:var(--amber); cursor:pointer; flex-shrink:0; }
@@ -386,35 +532,61 @@ body { background: var(--mahogany); color: var(--ink); font-family: var(--body);
 </head>
 <body>
 
-<!-- LOADING -->
+<!-- PROFILE SCREEN -->
+<div id="profile-screen">
+  <div class="ps-inner">
+    <h1 class="ps-title">The Oracle&rsquo;s Shelf</h1>
+    <p class="ps-sub">Who is consulting the stacks today?</p>
+    <div class="ps-rule"><div class="ps-rule-line"></div><span class="ps-section-label">Saved Readers</span><div class="ps-rule-line"></div></div>
+    <div class="profile-list" id="profile-list"></div>
+    <div class="ps-rule"><div class="ps-rule-line"></div><span class="ps-section-label">New Reader</span><div class="ps-rule-line"></div></div>
+    <div class="ps-new">
+      <input id="ps-name-input" type="text" placeholder="Enter your name…" maxlength="32">
+      <button onclick="createProfile()">Begin</button>
+    </div>
+    <div class="ps-err" id="ps-err"></div>
+  </div>
+</div>
+
+<!-- PROFILE BADGE (shown inside app) -->
+<div class="profile-badge" id="profile-badge" style="display:none">
+  <span id="profile-badge-name"></span>
+  <button onclick="switchProfile()">Switch</button>
+</div>
+
+<!-- DOOR INTRO -->
 <div id="loading">
-  <div class="shelf-bg"></div>
-  <img class="lc" src="https://covers.openlibrary.org/b/isbn/0765326353-L.jpg" alt="">
-  <img class="lc" src="https://covers.openlibrary.org/b/isbn/0765311785-L.jpg" alt="">
-  <img class="lc" src="https://covers.openlibrary.org/b/isbn/0765360039-L.jpg" alt="">
-  <img class="lc" src="https://covers.openlibrary.org/b/isbn/0765326388-L.jpg" alt="">
-  <img class="lc" src="https://covers.openlibrary.org/b/isbn/034553980X-L.jpg" alt="">
-  <span id="loading-text">Consulting the stacks&hellip;</span>
-  <div class="trash-scene">
-    <svg class="trash-svg" viewBox="0 0 68 96" xmlns="http://www.w3.org/2000/svg">
-      <ellipse class="can-glow" cx="34" cy="50" rx="20" ry="13" fill="#ff5500"/>
-      <path class="fl-outer" d="M34 50 Q27 41 29 28 Q31 18 34 13 Q37 18 39 28 Q41 41 34 50Z" fill="#FF5500" opacity="0.90"/>
-      <path class="fl-mid"   d="M34 50 Q29 43 30.5 33 Q32 25 34 21 Q36 25 37.5 33 Q39 43 34 50Z" fill="#FF9900" opacity="0.94"/>
-      <path class="fl-inner" d="M34 49 Q30.5 44 31.5 37 Q32.5 31 34 29 Q35.5 31 36.5 37 Q37.5 44 34 49Z" fill="#FFDD00" opacity="0.90"/>
-      <path class="fl-core"  d="M34 47 Q32.5 44 33 40 Q33.5 37 34 36 Q34.5 37 35 40 Q35.5 44 34 47Z" fill="#FFFFFF" opacity="0.85"/>
-      <rect x="26" y="34" width="16" height="24" rx="1" fill="#6A0D0D" stroke="#4A0000" stroke-width="0.8"/>
-      <rect x="40" y="35" width="2" height="22" rx="0.4" fill="#F5E6C8" opacity="0.62"/>
-      <text font-family="Georgia,serif" font-size="3.0" fill="#FFCCA0" opacity="0.85" letter-spacing="0.5" transform="translate(34,46) rotate(-90)">ROMANTASY</text>
-      <rect x="29" y="54" width="10" height="4" rx="1" fill="#3A2A18" stroke="#28180A" stroke-width="0.9"/>
-      <rect x="11" y="58" width="46" height="5" rx="1.5" fill="#4A3828" stroke="#2E1E0E" stroke-width="1.1"/>
-      <rect x="14" y="63" width="40" height="28" rx="1.5" fill="#5A4030" stroke="#3A2A18" stroke-width="1.1"/>
-      <line x1="24" y1="63" x2="24" y2="91" stroke="#3A2A18" stroke-width="0.6" opacity="0.55"/>
-      <line x1="34" y1="63" x2="34" y2="91" stroke="#3A2A18" stroke-width="0.6" opacity="0.55"/>
-      <line x1="44" y1="63" x2="44" y2="91" stroke="#3A2A18" stroke-width="0.6" opacity="0.55"/>
-      <rect x="16" y="89" width="8" height="4" rx="1" fill="#3A2A18"/>
-      <rect x="44" y="89" width="8" height="4" rx="1" fill="#3A2A18"/>
-    </svg>
-    <div class="trash-caption">editorial opinion</div>
+  <div class="door-light"></div>
+  <div class="door-scene">
+    <div class="door-surround" id="door-surround">
+      <!-- Left door -->
+      <div class="door door-left" id="door-left">
+        <div class="door-grain"></div>
+        <div class="door-panel door-panel-top"></div>
+        <div class="door-panel door-panel-bottom"></div>
+        <div class="door-glow"></div>
+        <div class="door-handle-l">
+          <svg width="12" height="36" viewBox="0 0 12 36">
+            <rect x="4" y="0" width="4" height="36" rx="2" fill="#C8942A"/>
+            <circle cx="6" cy="6" r="5" fill="#D4A840" stroke="#9B6E1A" stroke-width="1"/>
+          </svg>
+        </div>
+      </div>
+      <!-- Right door -->
+      <div class="door door-right" id="door-right">
+        <div class="door-grain"></div>
+        <div class="door-panel door-panel-top"></div>
+        <div class="door-panel door-panel-bottom"></div>
+        <div class="door-glow"></div>
+        <div class="door-handle-r">
+          <svg width="12" height="36" viewBox="0 0 12 36">
+            <rect x="4" y="0" width="4" height="36" rx="2" fill="#C8942A"/>
+            <circle cx="6" cy="6" r="5" fill="#D4A840" stroke="#9B6E1A" stroke-width="1"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+    <div class="door-title">The Oracle&rsquo;s Shelf</div>
   </div>
 </div>
 
@@ -536,6 +708,17 @@ body { background: var(--mahogany); color: var(--ink); font-family: var(--body);
       <div class="another-round">
         <button class="round-btn" onclick="requestAnotherRound()">Request Another Round</button>
       </div>
+
+      <!-- LOCAL BOOKSTORES -->
+      <div class="bookstores-section">
+        <div class="divider"><div class="divider-line l"></div><span class="divider-glyph">✦</span><div class="divider-line r"></div></div>
+        <div class="bookstores-head">
+          <h3>Find It Near You</h3>
+          <p>Independent bookstores within 10&nbsp;km</p>
+        </div>
+        <button class="locate-btn" id="locate-btn" onclick="findBookstores()">Locate Nearby Bookstores</button>
+        <div id="bs-list" class="bs-list"></div>
+      </div>
     </section>
 
   </div>
@@ -618,12 +801,55 @@ const SERIES = [
   {s:"From Blood and Ash",           a:"Jennifer L. Armentrout"},
 ];
 
-// ── KEY MANAGEMENT ─────────────────────────────────────────
-function getKey()   { return localStorage.getItem('anthropic_key') || ''; }
-function clearKey() { localStorage.removeItem('anthropic_key'); }
+// ── PROFILE SYSTEM ─────────────────────────────────────────
+let currentProfile = null; // string name
 
-// ── BOOT ───────────────────────────────────────────────────
-window.addEventListener('DOMContentLoaded', () => {
+function profileKey(suffix) { return `oracle_p_${currentProfile}_${suffix}`; }
+
+function getProfiles() {
+  try { return JSON.parse(localStorage.getItem('oracle_profiles') || '[]'); } catch(e) { return []; }
+}
+function saveProfiles(list) { localStorage.setItem('oracle_profiles', JSON.stringify(list)); }
+
+function getKey()   { return currentProfile ? localStorage.getItem(profileKey('key')) || '' : ''; }
+function clearKey() { if (currentProfile) localStorage.removeItem(profileKey('key')); }
+function storeKey(val) { if (currentProfile) localStorage.setItem(profileKey('key'), val); }
+
+function showProfileScreen() {
+  document.getElementById('profile-screen').style.display = 'flex';
+  renderProfileList();
+  setTimeout(() => document.getElementById('ps-name-input').focus(), 80);
+}
+
+function renderProfileList() {
+  const list = document.getElementById('profile-list');
+  const profiles = getProfiles();
+  if (profiles.length === 0) {
+    list.innerHTML = `<div style="font-family:var(--body);font-style:italic;color:rgba(44,26,14,0.4);font-size:0.9rem;text-align:center;padding:0.5rem 0">No saved readers yet</div>`;
+    return;
+  }
+  list.innerHTML = '';
+  profiles.forEach(p => {
+    const entry = document.createElement('div');
+    entry.className = 'profile-entry';
+    entry.innerHTML = `
+      <div>
+        <div class="profile-entry-name">${esc(p.name)}</div>
+        <div class="profile-entry-meta">${p.created || ''}</div>
+      </div>
+      <button class="profile-delete" title="Delete profile" onclick="deleteProfile('${esc(p.name)}', event)">×</button>
+    `;
+    entry.addEventListener('click', e => { if (!e.target.classList.contains('profile-delete')) selectProfile(p.name); });
+    list.appendChild(entry);
+  });
+}
+
+function selectProfile(name) {
+  currentProfile = name;
+  document.getElementById('profile-screen').style.display = 'none';
+  document.getElementById('profile-badge-name').textContent = name;
+  document.getElementById('profile-badge').style.display = 'flex';
+
   buildSlots('loved-slots',    10, 'loved');
   buildSlots('rejected-slots', 5,  'rejected');
   restoreSlots();
@@ -635,14 +861,70 @@ window.addEventListener('DOMContentLoaded', () => {
     return;
   }
   startLoading();
+}
+
+function createProfile() {
+  const input = document.getElementById('ps-name-input');
+  const name  = input.value.trim();
+  const err   = document.getElementById('ps-err');
+  if (!name) { err.textContent = 'Please enter a name.'; return; }
+  const profiles = getProfiles();
+  if (profiles.find(p => p.name.toLowerCase() === name.toLowerCase())) {
+    err.textContent = 'That name is already taken.'; return;
+  }
+  err.textContent = '';
+  const now = new Date().toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'});
+  profiles.push({ name, created: now });
+  saveProfiles(profiles);
+  input.value = '';
+  selectProfile(name);
+}
+
+function deleteProfile(name, e) {
+  e.stopPropagation();
+  if (!confirm(`Delete profile "${name}"? This cannot be undone.`)) return;
+  const profiles = getProfiles().filter(p => p.name !== name);
+  saveProfiles(profiles);
+  // remove all profile-specific localStorage keys
+  const prefix = `oracle_p_${name}_`;
+  Object.keys(localStorage).filter(k => k.startsWith(prefix)).forEach(k => localStorage.removeItem(k));
+  renderProfileList();
+}
+
+function switchProfile() {
+  // Reset app state before going back to profile screen
+  document.getElementById('profile-badge').style.display = 'none';
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('results').classList.add('hidden');
+  // Clear slots so they rebuild fresh for next profile
+  document.getElementById('loved-slots').innerHTML    = '';
+  document.getElementById('rejected-slots').innerHTML = '';
+  currentProfile = null;
+  showProfileScreen();
+}
+
+// ── KEY MANAGEMENT (delegates to profile) ──────────────────
+
+// ── BOOT ───────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('ps-name-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') createProfile();
+  });
+  showProfileScreen();
 });
 
 function startLoading() {
+  // Swing doors open after a brief pause
+  setTimeout(() => {
+    document.getElementById('door-left').classList.add('open');
+    document.getElementById('door-right').classList.add('open');
+  }, 600);
+  // After doors are open, fade out and show app
   setTimeout(() => {
     document.getElementById('loading').classList.add('fade-out');
     document.getElementById('app').style.display = 'block';
-    setTimeout(() => { document.getElementById('loading').style.display = 'none'; }, 1100);
-  }, 4400);
+    setTimeout(() => { document.getElementById('loading').style.display = 'none'; }, 1200);
+  }, 2400);
 }
 
 // ── KEY SCREEN ─────────────────────────────────────────────
@@ -659,7 +941,7 @@ function saveKey() {
     document.getElementById('key-err').textContent = 'Key should start with sk-ant-';
     return;
   }
-  localStorage.setItem('anthropic_key', val);
+  storeKey(val);
   document.getElementById('key-screen').style.display = 'none';
   document.getElementById('key-err').textContent = '';
 
@@ -752,6 +1034,7 @@ function makeSlot(index, mode) {
     dropdown.classList.remove('open');
     updateOracleState();
     saveSlots();
+    triggerEasterEgg(series);
     // Focus next empty slot
     const allInputs = [...document.querySelectorAll(`#${mode === 'loved' ? 'loved-slots' : 'rejected-slots'} .slot-input`)];
     const nextInput = allInputs.find(el => el.closest('.slot-field').querySelector('.slot-locked').style.display === 'none' && el !== input);
@@ -830,6 +1113,111 @@ function getSlotValues(containerId) {
   return [...document.querySelectorAll(`#${containerId} .slot-locked-name`)]
     .map(el => el.textContent.trim())
     .filter(Boolean);
+}
+
+// ── EASTER EGGS ────────────────────────────────────────────
+const EE_TRIGGERS = {
+  'stormlight': 'lightning',
+  'red rising':  'wolf',
+  'fourth wing': 'dragon',
+  'empyrean':    'dragon',
+  'acotar':      'acotar',
+};
+
+function triggerEasterEgg(seriesName) {
+  const key = seriesName.toLowerCase();
+  let type = null;
+  for (const [trigger, effect] of Object.entries(EE_TRIGGERS)) {
+    if (key.includes(trigger)) { type = effect; break; }
+  }
+  if (!type) return;
+
+  const overlay = document.createElement('div');
+  overlay.className = 'ee-overlay';
+  document.body.appendChild(overlay);
+
+  if (type === 'lightning') {
+    overlay.innerHTML = `
+      <div class="ee-lightning-sky"></div>
+      ${makeBolts()}
+    `;
+  } else if (type === 'wolf') {
+    overlay.innerHTML = `<div class="ee-wolf">${wolfSVG()}</div>`;
+  } else if (type === 'dragon') {
+    overlay.innerHTML = `<div class="ee-dragon">${dragonSVG()}</div>`;
+  } else if (type === 'acotar') {
+    overlay.innerHTML = `<div class="ee-acotar">🤮</div>`;
+  }
+
+  setTimeout(() => overlay.remove(), 3200);
+}
+
+function makeBolts() {
+  const positions = [15, 38, 62, 82];
+  const delays    = [0, 0.35, 0.7, 1.1];
+  return positions.map((x, i) => `
+    <svg class="ee-bolt" style="left:${x}%;animation-delay:${delays[i]}s" width="60" height="340" viewBox="0 0 60 340">
+      <polyline points="30,0 18,120 34,120 10,340" fill="none" stroke="white" stroke-width="${2.5 - i*0.3}" stroke-linejoin="round" opacity="0.92"/>
+      <polyline points="30,0 18,120 34,120 10,340" fill="none" stroke="#b0d8ff" stroke-width="${1.2 - i*0.1}" stroke-linejoin="round" opacity="0.6"/>
+    </svg>`).join('');
+}
+
+function wolfSVG() {
+  return `<svg width="120" height="80" viewBox="0 0 120 80" xmlns="http://www.w3.org/2000/svg">
+    <!-- body -->
+    <ellipse cx="55" cy="52" rx="30" ry="16" fill="#2a2a2a"/>
+    <!-- head -->
+    <ellipse cx="85" cy="38" rx="16" ry="13" fill="#2a2a2a"/>
+    <!-- snout -->
+    <ellipse cx="97" cy="42" rx="7" ry="5" fill="#3a3a3a"/>
+    <ellipse cx="99" cy="40" rx="2" ry="1.5" fill="#111"/>
+    <!-- ear left -->
+    <polygon points="76,28 80,14 86,27" fill="#2a2a2a"/>
+    <!-- ear right -->
+    <polygon points="84,26 90,13 94,26" fill="#2a2a2a"/>
+    <!-- eye -->
+    <circle cx="90" cy="35" r="2.5" fill="#f0c040"/>
+    <circle cx="90" cy="35" r="1.2" fill="#111"/>
+    <!-- tail -->
+    <path d="M25 50 Q10 30 18 20" stroke="#2a2a2a" stroke-width="7" fill="none" stroke-linecap="round"/>
+    <!-- legs -->
+    <line x1="40" y1="65" x2="36" y2="78" stroke="#1a1a1a" stroke-width="6" stroke-linecap="round"/>
+    <line x1="52" y1="67" x2="50" y2="79" stroke="#1a1a1a" stroke-width="6" stroke-linecap="round"/>
+    <line x1="65" y1="65" x2="70" y2="78" stroke="#1a1a1a" stroke-width="6" stroke-linecap="round"/>
+    <line x1="75" y1="63" x2="82" y2="75" stroke="#1a1a1a" stroke-width="6" stroke-linecap="round"/>
+  </svg>`;
+}
+
+function dragonSVG() {
+  return `<svg width="160" height="100" viewBox="0 0 160 100" xmlns="http://www.w3.org/2000/svg">
+    <!-- body -->
+    <ellipse cx="80" cy="62" rx="42" ry="20" fill="#8B1A1A"/>
+    <!-- neck -->
+    <path d="M115 52 Q130 35 138 28" stroke="#8B1A1A" stroke-width="14" fill="none" stroke-linecap="round"/>
+    <!-- head -->
+    <ellipse cx="143" cy="24" rx="15" ry="10" fill="#8B1A1A"/>
+    <!-- snout -->
+    <ellipse cx="156" cy="27" rx="7" ry="4.5" fill="#a02020"/>
+    <!-- nostril -->
+    <circle cx="160" cy="26" r="1.5" fill="#600"/>
+    <!-- eye -->
+    <ellipse cx="149" cy="20" rx="3" ry="3.5" fill="#f0c000"/>
+    <ellipse cx="149" cy="20" rx="1.2" ry="2" fill="#111"/>
+    <!-- horn -->
+    <polygon points="140,14 145,2 148,15" fill="#5a1010"/>
+    <!-- wing left -->
+    <path d="M70 55 Q40 15 10 5 Q30 35 42 60Z" fill="#6B1414" opacity="0.9"/>
+    <line x1="70" y1="55" x2="10" y2="5" stroke="#4a0e0e" stroke-width="2"/>
+    <line x1="70" y1="55" x2="30" y2="18" stroke="#4a0e0e" stroke-width="1.5"/>
+    <!-- wing right -->
+    <path d="M90 55 Q120 15 148 8 Q128 38 118 62Z" fill="#6B1414" opacity="0.9"/>
+    <!-- tail -->
+    <path d="M38 68 Q20 72 8 65 Q0 60 5 54" stroke="#8B1A1A" stroke-width="8" fill="none" stroke-linecap="round"/>
+    <polygon points="5,54 -2,48 10,50" fill="#8B1A1A"/>
+    <!-- flame -->
+    <path d="M160 27 Q172 22 178 18 Q170 28 176 32 Q166 28 160 35Z" fill="#FF6600" opacity="0.9"/>
+    <path d="M160 27 Q168 24 172 21 Q166 27 170 30 Q163 27 160 33Z" fill="#FFCC00" opacity="0.8"/>
+  </svg>`;
 }
 
 // ── GOODREADS IMPORT ───────────────────────────────────────
@@ -946,6 +1334,7 @@ function clearGrData() {
 
 // ── PERSIST SELECTIONS ─────────────────────────────────────
 function saveSlots() {
+  if (!currentProfile) return;
   ['loved-slots', 'rejected-slots'].forEach(id => {
     const data = [...document.querySelectorAll(`#${id} .slot`)].map(slot => {
       const lk = slot.querySelector('.slot-locked');
@@ -957,14 +1346,15 @@ function saveSlots() {
       }
       return null;
     }).filter(Boolean);
-    localStorage.setItem('oracle_' + id, JSON.stringify(data));
+    localStorage.setItem(profileKey(id), JSON.stringify(data));
   });
 }
 
 function restoreSlots() {
+  if (!currentProfile) return;
   try {
     ['loved-slots', 'rejected-slots'].forEach(id => {
-      const saved = JSON.parse(localStorage.getItem('oracle_' + id) || '[]');
+      const saved = JSON.parse(localStorage.getItem(profileKey(id)) || '[]');
       const slots = [...document.querySelectorAll(`#${id} .slot`)];
       saved.forEach((item, i) => { if (slots[i] && item) slots[i]._lock(item.s, item.a); });
     });
@@ -1172,6 +1562,71 @@ function renderResults(recs) {
   visible.forEach(rec => stack.appendChild(buildCard(rec)));
   renumberCards();
   setTimeout(() => document.getElementById('results').scrollIntoView({ behavior:'smooth', block:'start' }), 80);
+}
+
+// ── LOCAL BOOKSTORES ───────────────────────────────────────
+async function findBookstores() {
+  const btn  = document.getElementById('locate-btn');
+  const list = document.getElementById('bs-list');
+  btn.disabled = true;
+  btn.textContent = 'Finding your location…';
+  list.innerHTML  = '';
+
+  if (!navigator.geolocation) {
+    list.innerHTML = `<div class="bs-msg">Geolocation is not supported by your browser.</div>`;
+    btn.disabled = false; btn.textContent = 'Locate Nearby Bookstores'; return;
+  }
+
+  navigator.geolocation.getCurrentPosition(
+    async pos => {
+      btn.textContent = 'Searching nearby…';
+      const { latitude: lat, longitude: lon } = pos.coords;
+      try {
+        const query = `[out:json][timeout:20];node["shop"="books"](around:10000,${lat},${lon});out body;`;
+        const res   = await fetch('https://overpass-api.de/api/interpreter', {
+          method: 'POST', body: query
+        });
+        const data = await res.json();
+        const nodes = data.elements || [];
+
+        if (nodes.length === 0) {
+          list.innerHTML = `<div class="bs-msg">No bookshops found within 10&thinsp;km. Try a larger city nearby.</div>`;
+          btn.disabled = false; btn.textContent = 'Search Again'; return;
+        }
+
+        // Sort by distance, show up to 8
+        function dist(n) {
+          const dx = n.lat - lat, dy = n.lon - lon;
+          return Math.sqrt(dx*dx + dy*dy);
+        }
+        nodes.sort((a,b) => dist(a) - dist(b));
+        const top = nodes.slice(0, 8);
+
+        list.innerHTML = top.map(n => {
+          const name = n.tags?.name || 'Unnamed Bookstore';
+          const addr = [n.tags?.['addr:housenumber'], n.tags?.['addr:street'], n.tags?.['addr:city']]
+            .filter(Boolean).join(' ') || n.tags?.['addr:full'] || '';
+          const km   = (dist(n) * 111).toFixed(1);
+          return `<div class="bs-card">
+            <div class="bs-name">${esc(name)}</div>
+            ${addr ? `<div class="bs-addr">${esc(addr)}</div>` : ''}
+            <div class="bs-dist">${km}&thinsp;km away</div>
+          </div>`;
+        }).join('');
+
+        btn.textContent = 'Refresh';
+        btn.disabled = false;
+      } catch(e) {
+        list.innerHTML = `<div class="bs-msg">Could not reach bookstore data — check your connection.</div>`;
+        btn.disabled = false; btn.textContent = 'Try Again';
+      }
+    },
+    err => {
+      list.innerHTML = `<div class="bs-msg">Location access denied. Enable it in your browser to find nearby stores.</div>`;
+      btn.disabled = false; btn.textContent = 'Locate Nearby Bookstores';
+    },
+    { timeout: 8000 }
+  );
 }
 </script>
 </body>
