@@ -1025,7 +1025,7 @@ async function consultOracle() {
         },
         body: JSON.stringify({
           model: 'claude-sonnet-4-6',
-          max_tokens: 2400,
+          max_tokens: 5000,
           system,
           messages: [{ role: 'user', content: user }]
         })
@@ -1049,7 +1049,16 @@ async function consultOracle() {
     try {
       const stripped = text.replace(/```(?:json)?/gi, '').trim();
       const m = stripped.match(/\[[\s\S]*\]/);
-      recs = JSON.parse(m ? m[0] : stripped);
+      const raw = m ? m[0] : stripped;
+      try {
+        recs = JSON.parse(raw);
+      } catch(e) {
+        // Truncated JSON — salvage complete objects by finding the last clean }
+        const lastClose = raw.lastIndexOf('},');
+        if (lastClose === -1) throw e;
+        const salvaged = raw.slice(0, lastClose + 1) + ']';
+        recs = JSON.parse(salvaged);
+      }
     } catch(e) { throw new Error(`Could not parse response: ${e.message}`); }
 
     if (!Array.isArray(recs) || !recs.length) throw new Error('No recommendations returned');
