@@ -1771,8 +1771,8 @@ async function consultOracle() {
   }
 
   const completedOnly = document.getElementById('completed-only-toggle').checked;
-  const completedConstraint = completedOnly ? ' IMPORTANT: ONLY recommend series where every book has already been published (is_complete: true). Do NOT include any ongoing or unfinished series.' : '';
-  const user = `A reader enjoys these series: ${loved.join(', ')}.${banContext}${grContext}${completedConstraint} Recommend exactly 15 fantasy series not already listed above, ordered from best match to good match. Return a JSON array where each object has: { "title": string, "author": string, "books_in_series": integer, "is_complete": boolean, "one_sentence_description": string, "why_this_reader": string, "subgenre": string }.`;
+  const completedConstraint = completedOnly ? ' CRITICAL: ONLY recommend series where ALL books are already published and the series is fully complete (is_complete: true). Do NOT include any ongoing, unfinished, or in-progress series under any circumstances.' : '';
+  const user = `A reader enjoys these series: ${loved.join(', ')}.${banContext}${grContext}${completedConstraint} Recommend exactly 12 fantasy series NOT in the reader's loved list above, ordered from best match to good match. Keep one_sentence_description under 20 words. Keep why_this_reader under 30 words. Return ONLY a valid JSON array with no extra text, where each object has exactly these keys: { "title": string, "author": string, "books_in_series": integer, "is_complete": boolean, "one_sentence_description": string, "why_this_reader": string, "subgenre": string }.`;
 
   try {
     let res;
@@ -1787,7 +1787,7 @@ async function consultOracle() {
         },
         body: JSON.stringify({
           model: 'claude-sonnet-4-6',
-          max_tokens: 5000,
+          max_tokens: 8000,
           system,
           messages: [{ role: 'user', content: user }]
         })
@@ -1840,13 +1840,29 @@ async function consultOracle() {
 
     if (!Array.isArray(recs) || !recs.length) throw new Error('No recommendations returned');
 
+    const norm = s => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+
     // Safety net: drop any rec by a banned author (case/punctuation insensitive)
     if (bannedAuthors.length > 0) {
-      const norm = s => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
       const banned = bannedAuthors.map(norm);
       recs = recs.filter(r => !banned.some(b => norm(r.author).includes(b) || b.includes(norm(r.author))));
       if (!recs.length) throw new Error('No recommendations remained after author filtering');
     }
+
+    // Safety net: drop any rec whose title matches the loved list
+    const lovedNorm = loved.map(norm);
+    recs = recs.filter(r => !lovedNorm.some(l => norm(r.title).includes(l) || l.includes(norm(r.title))));
+
+    // Safety net: drop recs with placeholder / stub text in key fields
+    const isStub = s => !s || /placeholder|lorem ipsum|tbd|n\/a/i.test(s) || String(s).trim().length < 5;
+    recs = recs.filter(r => !isStub(r.title) && !isStub(r.one_sentence_description) && !isStub(r.why_this_reader));
+
+    // Safety net: if completed-only toggle is on, drop ongoing series
+    if (completedOnly) {
+      recs = recs.filter(r => r.is_complete === true);
+    }
+
+    if (!recs.length) throw new Error('No valid recommendations returned — try again');
 
     renderResults(recs);
     setUIState('results');
