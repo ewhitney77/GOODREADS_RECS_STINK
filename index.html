@@ -35,44 +35,22 @@ body { background: var(--mahogany); color: var(--ink); font-family: var(--body);
 }
 #loading.fade-out { opacity: 0; pointer-events: none; }
 
-/* Library scene behind doors */
+/* Library scene revealed behind doors — pure SVG, no external images */
 .shelf-scene {
   position: absolute; inset: 0; z-index: 1;
-  background:
-    radial-gradient(ellipse at 50% 45%, rgba(220,140,50,0.22) 0%, transparent 60%),
-    linear-gradient(180deg, #0e0703 0%, #221408 50%, #0e0703 100%);
+  overflow: hidden;
 }
-.shelf-scene::before {
-  content:''; position:absolute; inset:0;
-  background: repeating-linear-gradient(90deg, transparent 0, transparent 28px, rgba(0,0,0,0.15) 28px, rgba(0,0,0,0.15) 29px);
-}
-/* Horizontal shelf planks */
-.shelf-plank {
-  position:absolute; left:3%; right:3%; height:16px;
-  background: linear-gradient(180deg, #5a3418 0%, #3a2010 55%, #1a0c05 100%);
-  box-shadow: 0 5px 18px rgba(0,0,0,0.7), inset 0 1px 0 rgba(180,120,60,0.35);
-  z-index: 2;
-}
-.shelf-plank.p1 { top: 44%; }
-.shelf-plank.p2 { top: 75%; }
+.shelf-scene svg { width: 100%; height: 100%; display: block; }
 
-/* Book rows sit on top of planks */
-.shelf-row {
-  position:absolute; left:5%; right:5%;
-  display:flex; align-items:flex-end; justify-content:center; gap:clamp(4px,0.8vw,10px);
-  z-index: 2;
-}
-.shelf-row.r1 { bottom: 57%; }
-.shelf-row.r2 { bottom: 26%; }
-.shelf-cover {
-  width: clamp(58px, 8.5vw, 110px); height: clamp(90px, 13vw, 168px);
-  object-fit: cover;
-  box-shadow: 3px 5px 16px rgba(0,0,0,0.65), inset 0 0 0 1px rgba(0,0,0,0.3);
-  background: #2a1810; border-radius: 1px;
-  display: block;
-}
-.shelf-cover:nth-child(odd)  { transform: rotate(-0.8deg); }
-.shelf-cover:nth-child(even) { transform: rotate(0.6deg) translateY(-2px); }
+/* Candle flame animations */
+@keyframes candleA { 0%,100%{transform:scaleX(1)   scaleY(1)   rotate(-1deg)} 40%{transform:scaleX(0.88) scaleY(1.08) rotate(2deg)}  70%{transform:scaleX(1.06) scaleY(0.95) rotate(-1.5deg)} }
+@keyframes candleB { 0%,100%{transform:scaleX(1)   scaleY(1)   rotate(1deg)}  35%{transform:scaleX(1.07) scaleY(0.94) rotate(-2deg)} 65%{transform:scaleX(0.9)  scaleY(1.07) rotate(1.2deg)} }
+@keyframes candleC { 0%,100%{transform:scaleX(0.95) scaleY(1.05) rotate(0deg)} 50%{transform:scaleX(1.04) scaleY(0.96) rotate(-1.8deg)} }
+@keyframes glowPulse { 0%,100%{opacity:0.55} 50%{opacity:0.85} }
+.flame-a { animation: candleA 0.7s ease-in-out infinite; transform-box:fill-box; transform-origin:50% 100%; }
+.flame-b { animation: candleB 0.9s ease-in-out infinite; transform-box:fill-box; transform-origin:50% 100%; }
+.flame-c { animation: candleC 0.55s ease-in-out infinite; transform-box:fill-box; transform-origin:50% 100%; }
+.candle-glow { animation: glowPulse 1.4s ease-in-out infinite; }
 
 /* Burning trash can */
 .shelf-trash {
@@ -369,6 +347,25 @@ body { background: var(--mahogany); color: var(--ink); font-family: var(--body);
 .oracle-btn:disabled { opacity:0.38; cursor:not-allowed; }
 .oracle-hint { font-family:var(--body); font-style:italic; font-size:0.8rem; color:rgba(44,26,14,0.42); margin-top:0.75rem; min-height:1.2em; }
 
+/* ── COMPLETED SERIES TOGGLE ────────────────────────────────── */
+.completed-toggle-row { display:flex; align-items:center; justify-content:center; gap:0.75rem; margin-top:1.4rem; }
+.completed-toggle-row label { font-family:var(--body); font-size:0.82rem; color:rgba(44,26,14,0.62); letter-spacing:0.04em; cursor:pointer; user-select:none; }
+.toggle-switch { position:relative; display:inline-block; width:42px; height:24px; flex-shrink:0; }
+.toggle-switch input { opacity:0; width:0; height:0; position:absolute; }
+.toggle-track {
+  position:absolute; inset:0; border-radius:12px;
+  background:#c9b99a; border:1.5px solid #a08060;
+  transition:background 0.22s, border-color 0.22s; cursor:pointer;
+}
+.toggle-track::after {
+  content:''; position:absolute; top:3px; left:3px;
+  width:16px; height:16px; border-radius:50%;
+  background:var(--mahogany); box-shadow:0 1px 3px rgba(0,0,0,0.28);
+  transition:transform 0.22s;
+}
+.toggle-switch input:checked + .toggle-track { background:var(--amber); border-color:#b8801a; }
+.toggle-switch input:checked + .toggle-track::after { transform:translateX(18px); }
+
 /* ── CANDLE LOADING ─────────────────────────────────────────── */
 .oracle-loading { display:none; flex-direction:column; align-items:center; gap:1.3rem; padding:2.5rem 0; }
 .oracle-loading.active { display:flex; }
@@ -610,46 +607,213 @@ body { background: var(--mahogany); color: var(--ink); font-family: var(--body);
 <div id="loading">
   <div class="door-light"></div>
 
-  <!-- Bookshelf scene revealed when doors open -->
+  <!-- Library scene — pure SVG, no external images -->
   <div class="shelf-scene" id="shelf-scene">
-    <div class="shelf-plank p1"></div>
-    <div class="shelf-plank p2"></div>
-    <div class="shelf-row r1">
-      <img class="shelf-cover" src="https://covers.openlibrary.org/b/isbn/0345539788-L.jpg" alt="Red Rising">
-      <img class="shelf-cover" src="https://covers.openlibrary.org/b/isbn/0765326353-L.jpg" alt="Stormlight Archive">
-      <img class="shelf-cover" src="https://covers.openlibrary.org/b/isbn/0765311786-L.jpg" alt="Mistborn">
-    </div>
-    <div class="shelf-row r2">
-      <img class="shelf-cover" src="https://covers.openlibrary.org/b/isbn/0316187747-L.jpg" alt="Riyria Revelations">
-      <img class="shelf-cover" src="https://covers.openlibrary.org/b/isbn/0989671402-L.jpg" alt="Cradle">
-      <img class="shelf-cover" src="https://covers.openlibrary.org/b/isbn/0316274100-L.jpg" alt="Licanius Trilogy">
-    </div>
+    <svg viewBox="0 0 1000 700" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="roomGlow" cx="50%" cy="45%" r="55%">
+          <stop offset="0%"   stop-color="#2a1400" stop-opacity="1"/>
+          <stop offset="100%" stop-color="#050201" stop-opacity="1"/>
+        </radialGradient>
+        <radialGradient id="candleGlow1" cx="50%" cy="50%" r="50%">
+          <stop offset="0%"   stop-color="#ffcc44" stop-opacity="0.5"/>
+          <stop offset="100%" stop-color="#ff8800" stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="candleGlow2" cx="50%" cy="50%" r="50%">
+          <stop offset="0%"   stop-color="#ffcc44" stop-opacity="0.4"/>
+          <stop offset="100%" stop-color="#ff8800" stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="candleGlow3" cx="50%" cy="50%" r="50%">
+          <stop offset="0%"   stop-color="#ffcc44" stop-opacity="0.45"/>
+          <stop offset="100%" stop-color="#ff8800" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
 
-    <!-- Burning romantasy in the corner trash can -->
-    <div class="shelf-trash">
-      <svg viewBox="0 0 68 110" xmlns="http://www.w3.org/2000/svg">
-        <ellipse cx="34" cy="62" rx="26" ry="14" fill="#ff5500" opacity="0.55"/>
-        <g class="flame-group">
-          <path d="M34 60 Q24 46 28 26 Q31 12 34 4 Q37 12 40 26 Q44 46 34 60Z" fill="#FF4400" opacity="0.92"/>
-          <path d="M34 58 Q27 48 30 32 Q32 22 34 16 Q36 22 38 32 Q41 48 34 58Z" fill="#FF8800" opacity="0.94"/>
-          <path d="M34 56 Q29 49 31 38 Q32.5 30 34 26 Q35.5 30 37 38 Q39 49 34 56Z" fill="#FFCC00" opacity="0.92"/>
-          <path d="M34 53 Q31.5 49 32.5 42 Q33.5 37 34 35 Q34.5 37 35.5 42 Q36.5 49 34 53Z" fill="#FFFFFF" opacity="0.85"/>
-        </g>
-        <!-- burning book -->
-        <rect x="26" y="48" width="16" height="22" rx="0.8" fill="#6A0D0D" stroke="#3a0000" stroke-width="0.8"/>
-        <rect x="40" y="49" width="2" height="20" rx="0.4" fill="#F5E6C8" opacity="0.65"/>
-        <text font-family="Georgia,serif" font-size="2.6" fill="#FFCCA0" opacity="0.85" letter-spacing="0.4" transform="translate(34,60) rotate(-90)">ROMANTASY</text>
-        <!-- trash can -->
-        <rect x="29" y="68" width="10" height="4" rx="1" fill="#3A2A18" stroke="#28180A" stroke-width="0.9"/>
-        <rect x="9"  y="72" width="50" height="6" rx="1.5" fill="#4A3828" stroke="#2E1E0E" stroke-width="1.1"/>
-        <rect x="13" y="78" width="42" height="30" rx="1.5" fill="#5A4030" stroke="#3A2A18" stroke-width="1.1"/>
-        <line x1="24" y1="78" x2="24" y2="108" stroke="#3A2A18" stroke-width="0.6" opacity="0.55"/>
-        <line x1="34" y1="78" x2="34" y2="108" stroke="#3A2A18" stroke-width="0.6" opacity="0.55"/>
-        <line x1="44" y1="78" x2="44" y2="108" stroke="#3A2A18" stroke-width="0.6" opacity="0.55"/>
-        <rect x="15" y="106" width="8" height="4" rx="1" fill="#3A2A18"/>
-        <rect x="45" y="106" width="8" height="4" rx="1" fill="#3A2A18"/>
-      </svg>
-    </div>
+      <!-- Room background -->
+      <rect width="1000" height="700" fill="url(#roomGlow)"/>
+
+      <!-- Stone floor -->
+      <rect x="0" y="580" width="1000" height="120" fill="#1a0e06"/>
+      <line x1="0" y1="580" x2="1000" y2="580" stroke="#2a1608" stroke-width="2"/>
+      <!-- Floor stone tiles -->
+      <line x1="0" y1="610" x2="1000" y2="610" stroke="#221008" stroke-width="1" opacity="0.6"/>
+      <line x1="0" y1="640" x2="1000" y2="640" stroke="#221008" stroke-width="1" opacity="0.6"/>
+      <line x1="0" y1="670" x2="1000" y2="670" stroke="#221008" stroke-width="1" opacity="0.6"/>
+      <line x1="100" y1="580" x2="100" y2="700" stroke="#221008" stroke-width="1" opacity="0.4"/>
+      <line x1="240" y1="580" x2="240" y2="700" stroke="#221008" stroke-width="1" opacity="0.4"/>
+      <line x1="400" y1="580" x2="400" y2="700" stroke="#221008" stroke-width="1" opacity="0.4"/>
+      <line x1="560" y1="580" x2="560" y2="700" stroke="#221008" stroke-width="1" opacity="0.4"/>
+      <line x1="720" y1="580" x2="720" y2="700" stroke="#221008" stroke-width="1" opacity="0.4"/>
+      <line x1="880" y1="580" x2="880" y2="700" stroke="#221008" stroke-width="1" opacity="0.4"/>
+
+      <!-- Back wall -->
+      <rect x="0" y="0" width="1000" height="590" fill="#0a0502"/>
+      <!-- Wall panelling -->
+      <rect x="0" y="0" width="1000" height="590" fill="none" stroke="#1a0c05" stroke-width="0"/>
+      <line x1="0" y1="120" x2="1000" y2="120" stroke="#1a0c06" stroke-width="1.5" opacity="0.6"/>
+
+      <!-- Left bookcase -->
+      <rect x="0"   y="0"   width="190" height="590" fill="#1e0f06"/>
+      <rect x="0"   y="0"   width="185" height="585" fill="#240f05"/>
+      <!-- shelf planks left -->
+      <rect x="0"   y="118" width="185" height="14" fill="#3a2010" stroke="#1a0a02" stroke-width="1"/>
+      <rect x="0"   y="258" width="185" height="14" fill="#3a2010" stroke="#1a0a02" stroke-width="1"/>
+      <rect x="0"   y="398" width="185" height="14" fill="#3a2010" stroke="#1a0a02" stroke-width="1"/>
+      <rect x="0"   y="538" width="185" height="14" fill="#3a2010" stroke="#1a0a02" stroke-width="1"/>
+      <!-- books left top shelf -->
+      <rect x="6"   y="20"  width="14" height="96" fill="#7a1e1e" rx="1"/>
+      <rect x="22"  y="28"  width="11" height="88" fill="#2d5016" rx="1"/>
+      <rect x="35"  y="18"  width="16" height="98" fill="#2c4a6b" rx="1"/>
+      <rect x="53"  y="30"  width="10" height="86" fill="#6b3a10" rx="1"/>
+      <rect x="65"  y="20"  width="13" height="96" fill="#4a1a3a" rx="1"/>
+      <rect x="80"  y="26"  width="11" height="90" fill="#1a3a2a" rx="1"/>
+      <rect x="93"  y="18"  width="15" height="98" fill="#5c2e2e" rx="1"/>
+      <rect x="110" y="28"  width="10" height="88" fill="#2d5016" rx="1"/>
+      <rect x="122" y="22"  width="14" height="94" fill="#7a1e1e" rx="1"/>
+      <rect x="138" y="30"  width="11" height="86" fill="#3a3a10" rx="1"/>
+      <rect x="151" y="18"  width="13" height="98" fill="#2c4a6b" rx="1"/>
+      <rect x="166" y="24"  width="12" height="92" fill="#5c2e2e" rx="1"/>
+      <!-- books left second shelf -->
+      <rect x="6"   y="160" width="16" height="96" fill="#2c4a6b" rx="1"/>
+      <rect x="24"  y="168" width="11" height="88" fill="#7a1e1e" rx="1"/>
+      <rect x="37"  y="158" width="14" height="98" fill="#2d5016" rx="1"/>
+      <rect x="53"  y="166" width="12" height="90" fill="#6b3a10" rx="1"/>
+      <rect x="67"  y="160" width="10" height="96" fill="#4a1a3a" rx="1"/>
+      <rect x="79"  y="162" width="15" height="94" fill="#1a3a2a" rx="1"/>
+      <rect x="96"  y="158" width="13" height="98" fill="#5c2e2e" rx="1"/>
+      <rect x="111" y="164" width="11" height="92" fill="#2d5016" rx="1"/>
+      <rect x="124" y="160" width="14" height="96" fill="#7a1e1e" rx="1"/>
+      <rect x="140" y="166" width="10" height="90" fill="#2c4a6b" rx="1"/>
+      <rect x="152" y="158" width="13" height="98" fill="#3a3a10" rx="1"/>
+      <rect x="167" y="162" width="12" height="94" fill="#6b3a10" rx="1"/>
+      <!-- books left third shelf -->
+      <rect x="6"   y="300" width="13" height="96" fill="#5c2e2e" rx="1"/>
+      <rect x="21"  y="308" width="11" height="88" fill="#2d5016" rx="1"/>
+      <rect x="34"  y="298" width="15" height="98" fill="#7a1e1e" rx="1"/>
+      <rect x="51"  y="306" width="10" height="90" fill="#1a3a2a" rx="1"/>
+      <rect x="63"  y="300" width="14" height="96" fill="#2c4a6b" rx="1"/>
+      <rect x="79"  y="302" width="12" height="94" fill="#4a1a3a" rx="1"/>
+      <rect x="93"  y="298" width="11" height="98" fill="#6b3a10" rx="1"/>
+      <rect x="106" y="304" width="15" height="92" fill="#3a3a10" rx="1"/>
+      <rect x="123" y="300" width="13" height="96" fill="#2d5016" rx="1"/>
+      <rect x="138" y="306" width="10" height="90" fill="#7a1e1e" rx="1"/>
+      <rect x="150" y="298" width="14" height="98" fill="#5c2e2e" rx="1"/>
+      <rect x="166" y="302" width="12" height="94" fill="#2c4a6b" rx="1"/>
+
+      <!-- Right bookcase -->
+      <rect x="810"  y="0"   width="190" height="590" fill="#1e0f06"/>
+      <rect x="815"  y="0"   width="185" height="585" fill="#240f05"/>
+      <!-- shelf planks right -->
+      <rect x="815"  y="118" width="185" height="14" fill="#3a2010" stroke="#1a0a02" stroke-width="1"/>
+      <rect x="815"  y="258" width="185" height="14" fill="#3a2010" stroke="#1a0a02" stroke-width="1"/>
+      <rect x="815"  y="398" width="185" height="14" fill="#3a2010" stroke="#1a0a02" stroke-width="1"/>
+      <rect x="815"  y="538" width="185" height="14" fill="#3a2010" stroke="#1a0a02" stroke-width="1"/>
+      <!-- books right top shelf -->
+      <rect x="820"  y="20"  width="13" height="96" fill="#2d5016" rx="1"/>
+      <rect x="835"  y="26"  width="11" height="90" fill="#7a1e1e" rx="1"/>
+      <rect x="848"  y="18"  width="15" height="98" fill="#5c2e2e" rx="1"/>
+      <rect x="865"  y="28"  width="10" height="88" fill="#2c4a6b" rx="1"/>
+      <rect x="877"  y="20"  width="14" height="96" fill="#1a3a2a" rx="1"/>
+      <rect x="893"  y="24"  width="12" height="92" fill="#6b3a10" rx="1"/>
+      <rect x="907"  y="18"  width="16" height="98" fill="#4a1a3a" rx="1"/>
+      <rect x="925"  y="28"  width="11" height="88" fill="#7a1e1e" rx="1"/>
+      <rect x="938"  y="20"  width="13" height="96" fill="#2d5016" rx="1"/>
+      <rect x="953"  y="26"  width="10" height="90" fill="#3a3a10" rx="1"/>
+      <rect x="965"  y="18"  width="15" height="98" fill="#2c4a6b" rx="1"/>
+      <rect x="982"  y="22"  width="12" height="94" fill="#5c2e2e" rx="1"/>
+      <!-- books right second shelf -->
+      <rect x="820"  y="160" width="14" height="96" fill="#7a1e1e" rx="1"/>
+      <rect x="836"  y="166" width="11" height="90" fill="#2c4a6b" rx="1"/>
+      <rect x="849"  y="158" width="13" height="98" fill="#2d5016" rx="1"/>
+      <rect x="864"  y="164" width="10" height="92" fill="#4a1a3a" rx="1"/>
+      <rect x="876"  y="158" width="15" height="98" fill="#6b3a10" rx="1"/>
+      <rect x="893"  y="162" width="12" height="94" fill="#1a3a2a" rx="1"/>
+      <rect x="907"  y="158" width="14" height="98" fill="#5c2e2e" rx="1"/>
+      <rect x="923"  y="166" width="11" height="90" fill="#7a1e1e" rx="1"/>
+      <rect x="936"  y="160" width="13" height="96" fill="#2d5016" rx="1"/>
+      <rect x="951"  y="164" width="10" height="92" fill="#3a3a10" rx="1"/>
+      <rect x="963"  y="158" width="15" height="98" fill="#2c4a6b" rx="1"/>
+      <rect x="980"  y="162" width="12" height="94" fill="#5c2e2e" rx="1"/>
+      <!-- books right third shelf -->
+      <rect x="820"  y="300" width="12" height="96" fill="#2c4a6b" rx="1"/>
+      <rect x="834"  y="306" width="14" height="90" fill="#5c2e2e" rx="1"/>
+      <rect x="850"  y="298" width="11" height="98" fill="#7a1e1e" rx="1"/>
+      <rect x="863"  y="304" width="13" height="92" fill="#2d5016" rx="1"/>
+      <rect x="878"  y="300" width="10" height="96" fill="#6b3a10" rx="1"/>
+      <rect x="890"  y="302" width="15" height="94" fill="#4a1a3a" rx="1"/>
+      <rect x="907"  y="298" width="12" height="98" fill="#1a3a2a" rx="1"/>
+      <rect x="921"  y="304" width="11" height="92" fill="#3a3a10" rx="1"/>
+      <rect x="934"  y="300" width="14" height="96" fill="#7a1e1e" rx="1"/>
+      <rect x="950"  y="306" width="10" height="90" fill="#2c4a6b" rx="1"/>
+      <rect x="962"  y="298" width="13" height="98" fill="#5c2e2e" rx="1"/>
+      <rect x="977"  y="302" width="15" height="94" fill="#2d5016" rx="1"/>
+
+      <!-- Reading table in the center -->
+      <rect x="340" y="490" width="320" height="18" rx="3" fill="#3a2010" stroke="#1a0a02" stroke-width="1.5"/>
+      <rect x="355" y="508" width="12"  height="72" fill="#2a1608" stroke="#1a0a02" stroke-width="1"/>
+      <rect x="633" y="508" width="12"  height="72" fill="#2a1608" stroke="#1a0a02" stroke-width="1"/>
+      <!-- table surface detail -->
+      <rect x="342" y="492" width="316" height="4" fill="#4a2a14" opacity="0.5" rx="2"/>
+
+      <!-- Open book on table -->
+      <path d="M430 488 Q500 478 500 488 L500 492 Q500 482 430 492 Z" fill="#f5e6c8" opacity="0.85"/>
+      <path d="M570 488 Q500 478 500 488 L500 492 Q500 482 570 492 Z" fill="#e8d8b0" opacity="0.85"/>
+      <line x1="500" y1="478" x2="500" y2="492" stroke="#c8a870" stroke-width="0.8"/>
+      <!-- text lines on book -->
+      <line x1="438" y1="482" x2="494" y2="480" stroke="#a09060" stroke-width="0.7" opacity="0.6"/>
+      <line x1="436" y1="485" x2="494" y2="483" stroke="#a09060" stroke-width="0.7" opacity="0.6"/>
+      <line x1="438" y1="488" x2="494" y2="486" stroke="#a09060" stroke-width="0.7" opacity="0.6"/>
+      <line x1="506" y1="480" x2="562" y2="482" stroke="#a09060" stroke-width="0.7" opacity="0.6"/>
+      <line x1="506" y1="483" x2="562" y2="485" stroke="#a09060" stroke-width="0.7" opacity="0.6"/>
+      <line x1="506" y1="486" x2="562" y2="488" stroke="#a09060" stroke-width="0.7" opacity="0.6"/>
+
+      <!-- Candle 1 — left side of table -->
+      <ellipse class="candle-glow" cx="400" cy="482" rx="55" ry="40" fill="url(#candleGlow1)"/>
+      <rect x="397" y="462" width="7" height="26" rx="1.5" fill="#f5e6c8" stroke="#c8942a" stroke-width="0.5"/>
+      <line x1="400.5" y1="462" x2="400.5" y2="456" stroke="#3a2010" stroke-width="1" stroke-linecap="round"/>
+      <g class="flame-a">
+        <ellipse cx="400.5" cy="451" rx="4" ry="6" fill="#ff8800" opacity="0.9"/>
+        <ellipse cx="400.5" cy="452" rx="2.5" ry="4" fill="#ffcc00" opacity="0.95"/>
+        <ellipse cx="400.5" cy="453" rx="1.2" ry="2" fill="#ffffff" opacity="0.9"/>
+      </g>
+
+      <!-- Candle 2 — right side of table -->
+      <ellipse class="candle-glow" cx="600" cy="482" rx="55" ry="40" fill="url(#candleGlow2)"/>
+      <rect x="597" y="462" width="7" height="26" rx="1.5" fill="#f5e6c8" stroke="#c8942a" stroke-width="0.5"/>
+      <line x1="600.5" y1="462" x2="600.5" y2="456" stroke="#3a2010" stroke-width="1" stroke-linecap="round"/>
+      <g class="flame-b">
+        <ellipse cx="600.5" cy="451" rx="4" ry="6" fill="#ff8800" opacity="0.9"/>
+        <ellipse cx="600.5" cy="452" rx="2.5" ry="4" fill="#ffcc00" opacity="0.95"/>
+        <ellipse cx="600.5" cy="453" rx="1.2" ry="2" fill="#ffffff" opacity="0.9"/>
+      </g>
+
+      <!-- Candle sconce left wall -->
+      <ellipse class="candle-glow" cx="220" cy="200" rx="70" ry="60" fill="url(#candleGlow3)"/>
+      <rect x="210" y="210" width="6" height="20" rx="1" fill="#f5e6c8" stroke="#c8942a" stroke-width="0.5"/>
+      <rect x="205" y="228" width="16" height="4"  rx="1" fill="#3a2010"/>
+      <rect x="207" y="232" width="4"  height="16" rx="1" fill="#3a2010"/>
+      <line x1="213" y1="210" x2="213" y2="205" stroke="#3a2010" stroke-width="0.8" stroke-linecap="round"/>
+      <g class="flame-c">
+        <ellipse cx="213" cy="201" rx="3.5" ry="5" fill="#ff8800" opacity="0.9"/>
+        <ellipse cx="213" cy="202" rx="2"   ry="3.2" fill="#ffcc00" opacity="0.95"/>
+        <ellipse cx="213" cy="203" rx="1"   ry="1.6" fill="#ffffff" opacity="0.88"/>
+      </g>
+
+      <!-- Candle sconce right wall -->
+      <ellipse class="candle-glow" cx="780" cy="200" rx="70" ry="60" fill="url(#candleGlow1)"/>
+      <rect x="777" y="210" width="6" height="20" rx="1" fill="#f5e6c8" stroke="#c8942a" stroke-width="0.5"/>
+      <rect x="772" y="228" width="16" height="4"  rx="1" fill="#3a2010"/>
+      <rect x="782" y="232" width="4"  height="16" rx="1" fill="#3a2010"/>
+      <line x1="780" y1="210" x2="780" y2="205" stroke="#3a2010" stroke-width="0.8" stroke-linecap="round"/>
+      <g class="flame-a">
+        <ellipse cx="780" cy="201" rx="3.5" ry="5" fill="#ff8800" opacity="0.9"/>
+        <ellipse cx="780" cy="202" rx="2"   ry="3.2" fill="#ffcc00" opacity="0.95"/>
+        <ellipse cx="780" cy="203" rx="1"   ry="1.6" fill="#ffffff" opacity="0.88"/>
+      </g>
+
+      <!-- Vignette overlay -->
+      <rect width="1000" height="700" fill="url(#roomGlow)" opacity="0.45"/>
+    </svg>
   </div>
 
   <div class="door-scene">
@@ -769,6 +933,13 @@ body { background: var(--mahogany); color: var(--ink); font-family: var(--body);
       <div id="oracle-btn-row">
         <button class="oracle-btn" id="oracle-btn" onclick="consultOracle()" disabled>Consult the Oracle</button>
         <p class="oracle-hint" id="oracle-hint">Name at least three series you love to proceed</p>
+        <div class="completed-toggle-row">
+          <label class="toggle-switch" for="completed-only-toggle" title="Only show series where every book has been published">
+            <input type="checkbox" id="completed-only-toggle">
+            <span class="toggle-track"></span>
+          </label>
+          <label for="completed-only-toggle">Completed series only</label>
+        </div>
       </div>
       <div class="oracle-loading" id="oracle-loading">
         <svg class="librarian-svg" viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg">
@@ -1599,7 +1770,9 @@ async function consultOracle() {
     }
   }
 
-  const user = `A reader enjoys these series: ${loved.join(', ')}.${banContext}${grContext} Recommend exactly 15 fantasy series not already listed above, ordered from best match to good match. Return a JSON array where each object has: { "title": string, "author": string, "books_in_series": integer, "is_complete": boolean, "one_sentence_description": string, "why_this_reader": string, "subgenre": string }.`;
+  const completedOnly = document.getElementById('completed-only-toggle').checked;
+  const completedConstraint = completedOnly ? ' IMPORTANT: ONLY recommend series where every book has already been published (is_complete: true). Do NOT include any ongoing or unfinished series.' : '';
+  const user = `A reader enjoys these series: ${loved.join(', ')}.${banContext}${grContext}${completedConstraint} Recommend exactly 15 fantasy series not already listed above, ordered from best match to good match. Return a JSON array where each object has: { "title": string, "author": string, "books_in_series": integer, "is_complete": boolean, "one_sentence_description": string, "why_this_reader": string, "subgenre": string }.`;
 
   try {
     let res;
