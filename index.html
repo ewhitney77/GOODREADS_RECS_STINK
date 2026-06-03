@@ -229,42 +229,6 @@ body { background: var(--mahogany); color: var(--ink); font-family: var(--body);
 @keyframes glp  {0%{opacity:.10} 100%{opacity:.30}}
 
 /* ── FIRST-RUN KEY SCREEN ─────────────────────────────────── */
-#key-screen {
-  display: none; position: fixed; inset: 0; z-index: 99999;
-  background: var(--mahogany); align-items: center; justify-content: center; flex-direction: column;
-}
-#key-screen::before {
-  content: ''; position: absolute; inset: 0;
-  background: radial-gradient(ellipse at 50% 40%, rgba(212,146,42,0.08) 0%, transparent 65%);
-  pointer-events: none;
-}
-.ks-inner { position: relative; max-width: 480px; width: 90%; text-align: center; }
-.ks-rule  { display: flex; align-items: center; gap: 0.8rem; margin-bottom: 2rem; }
-.ks-rule-line { flex: 1; height: 1px; }
-.ks-rule-line.l { background: linear-gradient(90deg, transparent, var(--amber)); }
-.ks-rule-line.r { background: linear-gradient(90deg, var(--amber), transparent); }
-.ks-glyph { color: var(--amber); font-size: 1rem; opacity: 0.6; }
-.ks-title { font-family: var(--serif); font-size: 2rem; font-weight: 700; color: var(--parchment); letter-spacing: 0.04em; margin-bottom: 0.4rem; }
-.ks-sub   { font-family: var(--body); font-style: italic; font-size: 1rem; color: var(--amber); opacity: 0.8; margin-bottom: 2rem; letter-spacing: 0.04em; }
-.ks-desc  { font-family: var(--body); font-size: 0.92rem; color: rgba(245,230,200,0.6); line-height: 1.6; margin-bottom: 1.8rem; font-style: italic; }
-.ks-desc strong { color: var(--amber); font-style: normal; }
-#key-input {
-  width: 100%; padding: 0.75rem 1rem;
-  font-family: var(--mono); font-size: 0.85rem;
-  background: rgba(245,230,200,0.07); border: none;
-  border-bottom: 2px solid var(--amber); outline: none;
-  color: var(--parchment); margin-bottom: 0.5rem; text-align: center;
-}
-#key-input::placeholder { opacity: 0.35; }
-#key-err { font-family: var(--mono); font-size: 0.72rem; color: #e07070; min-height: 1.2em; margin-bottom: 1.2rem; }
-.ks-btn {
-  font-family: var(--serif); font-size: 1.05rem; font-weight: 600; letter-spacing: 0.1em;
-  color: var(--parchment); background: transparent;
-  border: 2px solid var(--amber); padding: 0.9rem 2.8rem;
-  cursor: pointer; width: 100%; transition: background 0.2s;
-}
-.ks-btn:hover { background: rgba(212,146,42,0.15); }
-.ks-footnote { font-family: var(--body); font-style: italic; font-size: 0.68rem; color: rgba(245,230,200,0.22); margin-top: 1.5rem; }
 
 /* ── MAIN APP ─────────────────────────────────────────────── */
 #app {
@@ -740,22 +704,6 @@ body { background: var(--mahogany); color: var(--ink); font-family: var(--body);
 </div>
 
 <!-- KEY SETUP SCREEN -->
-<div id="key-screen">
-  <div class="ks-inner">
-    <div class="ks-rule">
-      <div class="ks-rule-line l"></div>
-      <span class="ks-glyph">⁂</span>
-      <div class="ks-rule-line r"></div>
-    </div>
-    <h1 class="ks-title">The Oracle&rsquo;s Shelf</h1>
-    <p class="ks-sub">One-time setup</p>
-    <p class="ks-desc">This app calls the Anthropic API directly from your browser.<br>Your key is saved in <strong>this browser only</strong> — never stored anywhere else.</p>
-    <input id="key-input" type="password" placeholder="sk-ant-api03-…">
-    <p id="key-err"></p>
-    <button class="ks-btn" onclick="saveKey()">Enter the Library</button>
-    <p class="ks-footnote">Get a key at console.anthropic.com &middot; stored in localStorage only</p>
-  </div>
-</div>
 
 <!-- MAIN APP -->
 <div id="app">
@@ -1100,16 +1048,9 @@ function selectProfile(name) {
   restoreSlots();
   updateOracleState();
 
-  if (!getKey()) {
-    document.getElementById('loading').style.display = 'none';
-    showKeyScreen();
-    return;
-  }
   startLoading();
 }
 
-// Hide key screen option in UI when key is baked in
-function isKeyScreenNeeded() { return !hasBakedKey(); }
 
 function createProfile() {
   const input = document.getElementById('ps-name-input');
@@ -1188,36 +1129,7 @@ function startLoading() {
   document.getElementById('app').style.display = 'block';
 }
 
-// ── KEY SCREEN ─────────────────────────────────────────────
-function showKeyScreen(err) {
-  const ks = document.getElementById('key-screen');
-  ks.style.display = 'flex';
-  if (err) document.getElementById('key-err').textContent = err;
-  setTimeout(() => document.getElementById('key-input').focus(), 80);
-}
-
-function saveKey() {
-  const val = document.getElementById('key-input').value.trim();
-  if (!val.startsWith('sk-ant-')) {
-    document.getElementById('key-err').textContent = 'Key should start with sk-ant-';
-    return;
-  }
-  storeKey(val);
-  document.getElementById('key-screen').style.display = 'none';
-  document.getElementById('key-err').textContent = '';
-
-  if (document.getElementById('app').style.display !== 'block') {
-    startLoading();
-  } else {
-    consultOracle();
-  }
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('key-input').addEventListener('keydown', e => {
-    if (e.key === 'Enter') saveKey();
-  });
-});
+// ── KEY SCREEN — removed; key is baked in via CI ───────────
 
 // ── SLOT BUILDER ───────────────────────────────────────────
 function buildSlots(containerId, count, mode) {
@@ -1657,7 +1569,7 @@ function esc(s) {
 
 // ── API CALL ───────────────────────────────────────────────
 async function consultOracle() {
-  if (!getKey()) { showKeyScreen(); return; }
+  if (!getKey()) { document.getElementById('oracle-error-msg').textContent = 'API key not configured.'; setUIState('error'); return; }
 
   const loved        = getSlotValues('loved-slots');
   const rejectedPairs = getSlotPairs('rejected-slots');
@@ -1770,7 +1682,7 @@ async function consultOracle() {
     console.error('Oracle:', err.message);
     const m = err.message;
     let friendly = 'The oracle is unavailable. Try again.';
-    if (m.includes('401')) { clearKey(); showKeyScreen('Key rejected — enter a fresh key from console.anthropic.com'); return; }
+    if (m.includes('401')) { friendly = 'API key rejected (401). Check that ANTHROPIC_API_KEY secret is valid.'; }
     if (m.includes('403')) friendly = 'API key forbidden (403). Check key permissions.';
     if (m.includes('404')) friendly = 'Model not found (404). The model name may have changed.';
     if (m.includes('429')) friendly = 'Rate limit hit (429). Wait a moment and try again.';
