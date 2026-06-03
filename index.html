@@ -1045,8 +1045,18 @@ function getProfiles() {
 }
 function saveProfiles(list) { localStorage.setItem('oracle_profiles', JSON.stringify(list)); }
 
-function getKey()   { return currentProfile ? localStorage.getItem(profileKey('key')) || '' : ''; }
-function clearKey() { if (currentProfile) localStorage.removeItem(profileKey('key')); }
+// At deploy time CI replaces __ANTHROPIC_API_KEY__ with the real key.
+// In dev or if unset, falls back to a key entered manually via the key screen.
+const BAKED_KEY = '__ANTHROPIC_API_KEY__';
+const hasBakedKey = () => BAKED_KEY.length > 0 && !BAKED_KEY.startsWith('__');
+
+function getKey()   {
+  if (hasBakedKey()) return BAKED_KEY;
+  return currentProfile ? localStorage.getItem(profileKey('key')) || '' : '';
+}
+function clearKey() {
+  if (!hasBakedKey() && currentProfile) localStorage.removeItem(profileKey('key'));
+}
 function storeKey(val) { if (currentProfile) localStorage.setItem(profileKey('key'), val); }
 
 function showProfileScreen() {
@@ -1097,6 +1107,9 @@ function selectProfile(name) {
   }
   startLoading();
 }
+
+// Hide key screen option in UI when key is baked in
+function isKeyScreenNeeded() { return !hasBakedKey(); }
 
 function createProfile() {
   const input = document.getElementById('ps-name-input');
