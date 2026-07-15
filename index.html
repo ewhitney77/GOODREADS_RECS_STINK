@@ -42,27 +42,15 @@ body { background: var(--mahogany); color: var(--ink); font-family: var(--body);
 }
 .shelf-scene svg { width: 100%; height: 100%; display: block; }
 
-/* Candle flame animations */
-@keyframes candleA { 0%,100%{transform:scaleX(1)   scaleY(1)   rotate(-1deg)} 40%{transform:scaleX(0.88) scaleY(1.08) rotate(2deg)}  70%{transform:scaleX(1.06) scaleY(0.95) rotate(-1.5deg)} }
-@keyframes candleB { 0%,100%{transform:scaleX(1)   scaleY(1)   rotate(1deg)}  35%{transform:scaleX(1.07) scaleY(0.94) rotate(-2deg)} 65%{transform:scaleX(0.9)  scaleY(1.07) rotate(1.2deg)} }
-@keyframes candleC { 0%,100%{transform:scaleX(0.95) scaleY(1.05) rotate(0deg)} 50%{transform:scaleX(1.04) scaleY(0.96) rotate(-1.8deg)} }
-@keyframes glowPulse { 0%,100%{opacity:0.55} 50%{opacity:0.85} }
-.flame-a { animation: candleA 0.7s ease-in-out infinite; transform-box:fill-box; transform-origin:50% 100%; }
-.flame-b { animation: candleB 0.9s ease-in-out infinite; transform-box:fill-box; transform-origin:50% 100%; }
-.flame-c { animation: candleC 0.55s ease-in-out infinite; transform-box:fill-box; transform-origin:50% 100%; }
-.candle-glow { animation: glowPulse 1.4s ease-in-out infinite; }
-
-/* Burning trash can */
-.shelf-trash {
-  position:absolute; bottom:3%; right:5%; z-index:3;
-  width: clamp(65px, 9vw, 115px);
-  filter: drop-shadow(0 0 28px rgba(255,80,0,0.65)) drop-shadow(0 0 8px rgba(255,140,0,0.4));
-}
-@keyframes flameFlick {
-  0%,100% { transform: scale(1,1)   translateY(0)   rotate(-1.5deg); }
-  50%     { transform: scale(1.05,0.96) translateY(-2px) rotate(1.5deg); }
-}
-.flame-group { animation: flameFlick 0.4s ease-in-out infinite; transform-origin: 34px 48px; }
+/* Candle flame animations — gentle sway, alternate direction for smoothness */
+@keyframes candleA { 0%{transform:scaleX(1) scaleY(1) rotate(-1deg)} 100%{transform:scaleX(0.93) scaleY(1.06) rotate(1.4deg)} }
+@keyframes candleB { 0%{transform:scaleX(1.03) scaleY(0.97) rotate(1deg)} 100%{transform:scaleX(0.95) scaleY(1.05) rotate(-1.2deg)} }
+@keyframes candleC { 0%{transform:scaleX(0.97) scaleY(1.03) rotate(-0.8deg)} 100%{transform:scaleX(1.02) scaleY(0.96) rotate(1deg)} }
+@keyframes glowPulse { 0%{opacity:0.55} 100%{opacity:0.78} }
+.flame-a { animation: candleA 1.1s ease-in-out infinite alternate; transform-box:fill-box; transform-origin:50% 100%; }
+.flame-b { animation: candleB 1.35s ease-in-out infinite alternate; transform-box:fill-box; transform-origin:50% 100%; }
+.flame-c { animation: candleC 0.95s ease-in-out infinite alternate; transform-box:fill-box; transform-origin:50% 100%; }
+.candle-glow { animation: glowPulse 2.6s ease-in-out infinite alternate; }
 
 /* Title at the bottom of the intro */
 .door-title {
@@ -81,7 +69,9 @@ body { background: var(--mahogany); color: var(--ink); font-family: var(--body);
   position: absolute; top: 0; height: 100%;
   width: 50%;
   transform-style: preserve-3d;
-  transition: transform 1.9s cubic-bezier(0.55, 0.08, 0.25, 0.95);
+  transition: transform 2.4s cubic-bezier(0.34, 0.02, 0.18, 1);
+  will-change: transform;
+  backface-visibility: hidden;
   background:
     repeating-linear-gradient(91deg,
       rgba(0,0,0,0)       0px,
@@ -158,27 +148,6 @@ body { background: var(--mahogany); color: var(--ink); font-family: var(--body);
 @keyframes flicker { 0%,100%{opacity:1} 45%{opacity:0.82} 62%{opacity:0.96} 78%{opacity:0.80} }
 .door-light { animation:flicker 3.2s ease-in-out infinite; }
 
-.lc {
-  position: absolute; width: 108px; height: 162px; object-fit: cover;
-  border-radius: 2px 4px 4px 2px;
-  box-shadow: 3px 4px 22px rgba(0,0,0,0.92);
-  opacity: 0; animation: coverFlash var(--dur,4s) ease-in-out var(--delay,0s) infinite;
-}
-.lc:nth-child(2){--delay:0s;  --dur:4.1s; top:12%;   left:10%;}
-.lc:nth-child(3){--delay:0.9s;--dur:3.8s; top:16%;   right:11%;}
-.lc:nth-child(4){--delay:1.8s;--dur:4.4s; top:35%;   left:40%;}
-.lc:nth-child(5){--delay:2.7s;--dur:4.0s; bottom:20%;right:16%;}
-.lc:nth-child(6){--delay:3.5s;--dur:3.7s; bottom:16%;left:17%;}
-
-@keyframes coverFlash {
-  0%  {opacity:0;   transform:scale(0.87) rotate(-3deg);}
-  10% {opacity:0.80;transform:scale(1.0)  rotate(0deg);}
-  38% {opacity:0.88;transform:scale(1.02) rotate(1.2deg);}
-  70% {opacity:0.50;transform:scale(1.0)  rotate(-0.6deg);}
-  88% {opacity:0.12;transform:scale(0.93) rotate(-2deg);}
-  100%{opacity:0;   transform:scale(0.87) rotate(-3deg);}
-}
-
 #loading-text {
   position: relative; z-index: 10;
   font-family: var(--serif); font-size: 1.2rem; font-style: italic;
@@ -190,23 +159,6 @@ body { background: var(--mahogany); color: var(--ink); font-family: var(--body);
   background: var(--amber); margin: 10px auto 0; opacity: 0.45;
 }
 @keyframes breathe { 0%,100%{opacity:0.3} 50%{opacity:0.95} }
-
-/* Trash can flames */
-.trash-scene { position: absolute; bottom: 26px; right: 34px; z-index: 20; display: flex; flex-direction: column; align-items: center; }
-.trash-caption { font-family: var(--body); font-style: italic; font-size: 0.58rem; color: rgba(212,146,42,0.42); letter-spacing: 0.08em; margin-top: 5px; }
-.trash-svg { width: 68px; height: 96px; overflow: visible; }
-.fl-outer { animation: flo 0.64s ease-in-out infinite alternate; transform-origin: 34px 50px; }
-.fl-mid   { animation: flm 0.50s ease-in-out infinite alternate-reverse; transform-origin: 34px 53px; }
-.fl-inner { animation: fli 0.40s ease-in-out infinite alternate; transform-origin: 34px 55px; }
-.fl-core  { animation: flc 0.30s ease-in-out infinite alternate-reverse; transform-origin: 34px 57px; }
-.can-glow { animation: glp 1.1s ease-in-out infinite alternate; }
-@keyframes flo  {0%{transform:scaleY(1.0) scaleX(1.0);opacity:.87}  100%{transform:scaleY(1.15) scaleX(0.91);opacity:1}}
-@keyframes flm  {0%{transform:scaleY(1.0) scaleX(1.0) rotate(-2deg);opacity:.9} 100%{transform:scaleY(1.12) scaleX(0.90) rotate(3deg);opacity:1}}
-@keyframes fli  {0%{transform:scaleY(0.94) rotate(2.5deg);opacity:.84} 100%{transform:scaleY(1.14) rotate(-2.5deg);opacity:1}}
-@keyframes flc  {0%{transform:scaleY(1.0);opacity:.88} 100%{transform:scaleY(1.22);opacity:1}}
-@keyframes glp  {0%{opacity:.10} 100%{opacity:.30}}
-
-/* ── FIRST-RUN KEY SCREEN ─────────────────────────────────── */
 
 /* ── MAIN APP ─────────────────────────────────────────────── */
 #app {
@@ -317,6 +269,8 @@ body { background: var(--mahogany); color: var(--ink); font-family: var(--body);
 .drop-item:hover, .drop-item.active { background: rgba(212,146,42,0.12); }
 .drop-item-series { font-weight: 500; }
 .drop-item-author { font-style: italic; font-size: 0.78rem; color: rgba(44,26,14,0.45); white-space: nowrap; }
+.drop-item-custom { border-top: 1px dashed rgba(44,26,14,0.25); }
+.drop-item-custom .drop-item-series { font-style: italic; color: rgba(44,26,14,0.7); }
 
 /* Rejected zone */
 .rejected-zone {
@@ -1123,7 +1077,7 @@ const SERIES = [
   {s:"Bloodsworn",                   a:"John Gwynne"},
   // Progression Fantasy
   {s:"Dungeon Crawler Carl",         a:"Matt Dinniman"},
-  {s:"He Who Fights With Monsters",  a:"Jason Cheyne"},
+  {s:"He Who Fights With Monsters",  a:"Shirtaloon (Travis Deverell)"},
   {s:"The Wandering Inn",            a:"pirateaba"},
   // Sci-Fantasy
   {s:"The Broken Earth",             a:"N.K. Jemisin"},
@@ -1152,6 +1106,396 @@ const SERIES = [
   {s:"The Empyrean (Fourth Wing)",   a:"Rebecca Yarros"},
   {s:"Blood and Ash",                a:"Jennifer L. Armentrout"},
   {s:"From Blood and Ash",           a:"Jennifer L. Armentrout"},
+  // Epic & High Fantasy (expanded)
+  {s:"The Sword of Truth",           a:"Terry Goodkind"},
+  {s:"The Belgariad",                a:"David Eddings"},
+  {s:"The Malloreon",                a:"David Eddings"},
+  {s:"The Elenium",                  a:"David Eddings"},
+  {s:"The Deed of Paksenarrion",     a:"Elizabeth Moon"},
+  {s:"The Wars of Light and Shadow", a:"Janny Wurts"},
+  {s:"The Empire Trilogy",           a:"Raymond E. Feist & Janny Wurts"},
+  {s:"The Serpentwar Saga",          a:"Raymond E. Feist"},
+  {s:"The Tawny Man Trilogy",        a:"Robin Hobb"},
+  {s:"The Fitz and the Fool",        a:"Robin Hobb"},
+  {s:"The Rain Wild Chronicles",     a:"Robin Hobb"},
+  {s:"The Last Kingdom (Saxon Stories)", a:"Bernard Cornwell"},
+  {s:"The Osten Ard Saga (Last King)", a:"Tad Williams"},
+  {s:"Otherland",                    a:"Tad Williams"},
+  {s:"The Dagger and the Coin",      a:"Daniel Abraham"},
+  {s:"The Long Price Quartet",       a:"Daniel Abraham"},
+  {s:"The Expanse",                  a:"James S.A. Corey"},
+  {s:"Green Bone Saga",              a:"Fonda Lee"},
+  {s:"The Burning (The Rage of Dragons)", a:"Evan Winter"},
+  {s:"The Founders Trilogy",         a:"Robert Jackson Bennett"},
+  {s:"The Divine Cities",            a:"Robert Jackson Bennett"},
+  {s:"The Tainted Cup (Shadow of the Leviathan)", a:"Robert Jackson Bennett"},
+  {s:"The Masquerade (Baru Cormorant)", a:"Seth Dickinson"},
+  {s:"The Winnowing Flame",          a:"Jen Williams"},
+  {s:"The Wounded Kingdom",          a:"RJ Barker"},
+  {s:"The Tide Child Trilogy",       a:"RJ Barker"},
+  {s:"The Spellsong Cycle",          a:"L.E. Modesitt Jr."},
+  {s:"The Saga of Recluce",          a:"L.E. Modesitt Jr."},
+  {s:"The Runelords",                a:"David Farland"},
+  {s:"The Codex Alera",              a:"Jim Butcher"},
+  {s:"The Cinder Spires",            a:"Jim Butcher"},
+  {s:"The Inheritance Trilogy",      a:"N.K. Jemisin"},
+  {s:"Dreamblood Duology",           a:"N.K. Jemisin"},
+  {s:"The Great Cities",             a:"N.K. Jemisin"},
+  {s:"The Daevabad Trilogy",         a:"S.A. Chakraborty"},
+  {s:"The Amina al-Sirafi Adventures", a:"S.A. Chakraborty"},
+  {s:"The Bound and the Broken",     a:"Ryan Cahill"},
+  {s:"The Echoes Saga",              a:"Philip C. Quaintrell"},
+  {s:"Sun Eater",                    a:"Christopher Ruocchio"},
+  {s:"The Spellmonger Series",       a:"Terry Mancour"},
+  {s:"Tress of the Emerald Sea",     a:"Brandon Sanderson"},
+  {s:"The Sunlit Man",               a:"Brandon Sanderson"},
+  {s:"Yumi and the Nightmare Painter", a:"Brandon Sanderson"},
+  {s:"Skyward",                      a:"Brandon Sanderson"},
+  {s:"The Reckoners",                a:"Brandon Sanderson"},
+  {s:"Alcatraz vs. the Evil Librarians", a:"Brandon Sanderson"},
+  {s:"The Frugal Wizard's Handbook", a:"Brandon Sanderson"},
+  // Grimdark & Dark Fantasy (expanded)
+  {s:"The Age of Madness",           a:"Joe Abercrombie"},
+  {s:"Best Served Cold",             a:"Joe Abercrombie"},
+  {s:"The Heroes",                   a:"Joe Abercrombie"},
+  {s:"Red Country",                  a:"Joe Abercrombie"},
+  {s:"The Devils",                   a:"Joe Abercrombie"},
+  {s:"Raven's Mark",                 a:"Ed McDonald"},
+  {s:"The Raven's Shadow",           a:"Anthony Ryan"},
+  {s:"Draconis Memoria",             a:"Anthony Ryan"},
+  {s:"The Covenant of Steel",        a:"Anthony Ryan"},
+  {s:"Chronicles of the Unhewn Throne", a:"Brian Staveley"},
+  {s:"Ashes of the Unhewn Throne",   a:"Brian Staveley"},
+  {s:"The Empire of the Wolf",       a:"Richard Swan"},
+  {s:"Manifest Delusions",           a:"Michael R. Fletcher"},
+  {s:"The Court of Broken Knives (Empires of Dust)", a:"Anna Smith Spark"},
+  {s:"The Grim Company",             a:"Luke Scull"},
+  {s:"Low Town",                     a:"Daniel Polansky"},
+  {s:"The Vagrant Trilogy",          a:"Peter Newman"},
+  {s:"Beyond Redemption",            a:"Michael R. Fletcher"},
+  {s:"Prince of Nothing",            a:"R. Scott Bakker"},
+  {s:"The Aspect-Emperor",           a:"R. Scott Bakker"},
+  {s:"The Instrumentalities of the Night", a:"Glen Cook"},
+  {s:"The Dread Empire",             a:"Glen Cook"},
+  {s:"Garrett P.I.",                 a:"Glen Cook"},
+  {s:"The Malus Domestica",          a:"S.A. Hunt"},
+  {s:"Herald of the Storm (Steelhaven)", a:"Richard Ford"},
+  {s:"War for the Rose Throne",      a:"Peter McLean"},
+  {s:"The Chronicles of the Black Gate", a:"Phil Tucker"},
+  {s:"A Practical Guide to Evil",    a:"ErraticErrata"},
+  {s:"The Ember Blade (Darkwater Legacy)", a:"Chris Wooding"},
+  {s:"Tales of the Ketty Jay",       a:"Chris Wooding"},
+  {s:"Mordew (Cities of the Weft)",  a:"Alex Pheby"},
+  {s:"The Second Sons Trilogy",      a:"Jennifer Fallon"},
+  {s:"Monarchies of God",            a:"Paul Kearney"},
+  {s:"The Macht Trilogy",            a:"Paul Kearney"},
+  // Classic & Literary Fantasy (expanded)
+  {s:"Discworld",                    a:"Terry Pratchett"},
+  {s:"Good Omens",                   a:"Terry Pratchett & Neil Gaiman"},
+  {s:"American Gods",                a:"Neil Gaiman"},
+  {s:"Neverwhere",                   a:"Neil Gaiman"},
+  {s:"Stardust",                     a:"Neil Gaiman"},
+  {s:"The Sandman",                  a:"Neil Gaiman"},
+  {s:"The Chronicles of Narnia",     a:"C.S. Lewis"},
+  {s:"The Dark Tower",               a:"Stephen King"},
+  {s:"The Once and Future King",     a:"T.H. White"},
+  {s:"Gormenghast",                  a:"Mervyn Peake"},
+  {s:"The Worm Ouroboros",           a:"E.R. Eddison"},
+  {s:"Lyonesse Trilogy",             a:"Jack Vance"},
+  {s:"The Dying Earth",              a:"Jack Vance"},
+  {s:"Elric of Melniboné",           a:"Michael Moorcock"},
+  {s:"The Chronicles of Prydain",    a:"Lloyd Alexander"},
+  {s:"The Dark Is Rising Sequence",  a:"Susan Cooper"},
+  {s:"The Wizard of Earthsea",       a:"Ursula K. Le Guin"},
+  {s:"The Last Unicorn",             a:"Peter S. Beagle"},
+  {s:"Watership Down",               a:"Richard Adams"},
+  {s:"The Princess Bride",           a:"William Goldman"},
+  {s:"Dragonriders of Pern",         a:"Anne McCaffrey"},
+  {s:"The Deathgate Cycle",          a:"Margaret Weis & Tracy Hickman"},
+  {s:"Dragonlance Chronicles",       a:"Margaret Weis & Tracy Hickman"},
+  {s:"The Legend of Drizzt",         a:"R.A. Salvatore"},
+  {s:"The Icewind Dale Trilogy",     a:"R.A. Salvatore"},
+  {s:"The Fionavar Tapestry",        a:"Guy Gavriel Kay"},
+  {s:"A Brightness Long Ago",        a:"Guy Gavriel Kay"},
+  {s:"Under Heaven",                 a:"Guy Gavriel Kay"},
+  {s:"The Sarantine Mosaic",         a:"Guy Gavriel Kay"},
+  {s:"Piranesi",                     a:"Susanna Clarke"},
+  {s:"Uprooted",                     a:"Naomi Novik"},
+  {s:"Spinning Silver",              a:"Naomi Novik"},
+  {s:"Temeraire",                    a:"Naomi Novik"},
+  {s:"The Scholomance",              a:"Naomi Novik"},
+  {s:"Circe",                        a:"Madeline Miller"},
+  {s:"The Song of Achilles",         a:"Madeline Miller"},
+  {s:"The Starless Sea",             a:"Erin Morgenstern"},
+  {s:"The Ten Thousand Doors of January", a:"Alix E. Harrow"},
+  {s:"The Once and Future Witches",  a:"Alix E. Harrow"},
+  {s:"The Invisible Life of Addie LaRue", a:"V.E. Schwab"},
+  {s:"Vicious (Villains)",           a:"V.E. Schwab"},
+  {s:"Cassandra Palmer",             a:"Karen Chance"},
+  {s:"The Golem and the Jinni",      a:"Helene Wecker"},
+  {s:"The Bear and the Nightingale (Winternight)", a:"Katherine Arden"},
+  {s:"The City of Brass",            a:"S.A. Chakraborty"},
+  {s:"Babel",                        a:"R.F. Kuang"},
+  {s:"Yellowface",                   a:"R.F. Kuang"},
+  {s:"The Library at Mount Char",    a:"Scott Hawkins"},
+  {s:"The Magicians",                a:"Lev Grossman"},
+  {s:"The Golden Compass (His Dark Materials)", a:"Philip Pullman"},
+  {s:"The Book of Dust",             a:"Philip Pullman"},
+  {s:"The Inheritance Cycle (Eragon)", a:"Christopher Paolini"},
+  {s:"The Murderbot Diaries",        a:"Martha Wells"},
+  {s:"Books of the Raksura",         a:"Martha Wells"},
+  {s:"The Emperor's Soul",           a:"Brandon Sanderson"},
+  // Heist, Rogue & Adventure
+  {s:"Six of Crows",                 a:"Leigh Bardugo"},
+  {s:"Shadow and Bone (Grishaverse)", a:"Leigh Bardugo"},
+  {s:"King of Scars",                a:"Leigh Bardugo"},
+  {s:"Ninth House (Alex Stern)",     a:"Leigh Bardugo"},
+  {s:"The Mask of Mirrors (Rook & Rose)", a:"M.A. Carrick"},
+  {s:"Kings of the Wyld (The Band)", a:"Nicholas Eames"},
+  {s:"Bloody Rose",                  a:"Nicholas Eames"},
+  {s:"Orconomics (The Dark Profit Saga)", a:"J. Zachary Pike"},
+  {s:"The Palace Job (Rogues of the Republic)", a:"Patrick Weekes"},
+  {s:"Swords of the Emperor",        a:"Chris Wraight"},
+  {s:"The Amra Thetys Series",       a:"Michael McClung"},
+  {s:"Tales of Pell",                a:"Delilah S. Dawson & Kevin Hearne"},
+  {s:"The Aeronaut's Windlass",      a:"Jim Butcher"},
+  // Urban Fantasy
+  {s:"The Dresden Files",            a:"Jim Butcher"},
+  {s:"Rivers of London",             a:"Ben Aaronovitch"},
+  {s:"The Iron Druid Chronicles",    a:"Kevin Hearne"},
+  {s:"Alex Verus",                   a:"Benedict Jacka"},
+  {s:"The Hollows",                  a:"Kim Harrison"},
+  {s:"Mercy Thompson",               a:"Patricia Briggs"},
+  {s:"Alpha and Omega",              a:"Patricia Briggs"},
+  {s:"Kate Daniels",                 a:"Ilona Andrews"},
+  {s:"Hidden Legacy",                a:"Ilona Andrews"},
+  {s:"Innkeeper Chronicles",         a:"Ilona Andrews"},
+  {s:"The Laundry Files",            a:"Charles Stross"},
+  {s:"Sandman Slim",                 a:"Richard Kadrey"},
+  {s:"Felix Castor",                 a:"Mike Carey"},
+  {s:"The Checquy Files (The Rook)", a:"Daniel O'Malley"},
+  {s:"October Daye",                 a:"Seanan McGuire"},
+  {s:"InCryptid",                    a:"Seanan McGuire"},
+  {s:"Wayward Children",             a:"Seanan McGuire"},
+  {s:"The Invisible Library",        a:"Genevieve Cogman"},
+  {s:"Anita Blake",                  a:"Laurell K. Hamilton"},
+  {s:"The Others",                   a:"Anne Bishop"},
+  {s:"The Black Dagger Brotherhood", a:"J.R. Ward"},
+  {s:"Charley Davidson",             a:"Darynda Jones"},
+  {s:"Legends & Lattes",             a:"Travis Baldree"},
+  {s:"Bookshops & Bonedust",         a:"Travis Baldree"},
+  {s:"The House in the Cerulean Sea", a:"TJ Klune"},
+  {s:"Under the Whispering Door",    a:"TJ Klune"},
+  {s:"Emily Wilde's Encyclopaedia of Faeries", a:"Heather Fawcett"},
+  {s:"The Very Secret Society of Irregular Witches", a:"Sangu Mandanna"},
+  {s:"A Discovery of Witches (All Souls)", a:"Deborah Harkness"},
+  {s:"The Ex Hex",                   a:"Erin Sterling"},
+  // Progression / LitRPG / Cultivation (expanded)
+  {s:"Mother of Learning",           a:"Domagoj Kurmaić"},
+  {s:"Mage Errant",                  a:"John Bierce"},
+  {s:"Arcane Ascension",             a:"Andrew Rowe"},
+  {s:"Weirkey Chronicles",           a:"Sarah Lin"},
+  {s:"The Menocht Loop",             a:"Dean Henegar"},
+  {s:"Beware of Chicken",            a:"CasualFarmer"},
+  {s:"Defiance of the Fall",         a:"TheFirstDefier"},
+  {s:"Primal Hunter",                a:"Zogarth"},
+  {s:"Azarinth Healer",              a:"Rhaegar"},
+  {s:"Iron Prince (Warformed)",      a:"Bryce O'Connor & Luke Chmilenko"},
+  {s:"Super Powereds",               a:"Drew Hayes"},
+  {s:"Spells, Swords, & Stealth",    a:"Drew Hayes"},
+  {s:"Threadbare",                   a:"Andrew Seiple"},
+  {s:"Ascend Online",                a:"Luke Chmilenko"},
+  {s:"Awaken Online",                a:"Travis Bagwell"},
+  {s:"The Land (Chaos Seeds)",       a:"Aleron Kong"},
+  {s:"Ritualist (The Completionist Chronicles)", a:"Dakota Krout"},
+  {s:"The Divine Dungeon",           a:"Dakota Krout"},
+  {s:"The Path of Ascension",        a:"C. Mantis"},
+  {s:"Virtuous Sons",                a:"Ya Boy"},
+  {s:"Forge of Destiny",             a:"Yrsillar"},
+  {s:"Street Cultivation",           a:"Sarah Lin"},
+  {s:"A Thousand Li",                a:"Tao Wong"},
+  {s:"The System Apocalypse",        a:"Tao Wong"},
+  {s:"Worth the Candle",             a:"Alexander Wales"},
+  {s:"Worm (Parahumans)",            a:"Wildbow"},
+  {s:"Unsouled (Cradle Book 1)",     a:"Will Wight"},
+  {s:"The Last Horizon",             a:"Will Wight"},
+  {s:"Traveler's Gate",              a:"Will Wight"},
+  {s:"Elder Empire",                 a:"Will Wight"},
+  // Romantasy & Romantic Fantasy (expanded)
+  {s:"The Cruel Prince (Folk of the Air)", a:"Holly Black"},
+  {s:"The Stolen Heir",              a:"Holly Black"},
+  {s:"Book of Night",                a:"Holly Black"},
+  {s:"Caraval",                      a:"Stephanie Garber"},
+  {s:"Once Upon a Broken Heart",     a:"Stephanie Garber"},
+  {s:"The Plated Prisoner",          a:"Raven Kennedy"},
+  {s:"Zodiac Academy",               a:"Caroline Peckham & Susanne Valenti"},
+  {s:"The Bridge Kingdom",           a:"Danielle L. Jensen"},
+  {s:"A Fate Inked in Blood (Saga of the Unfated)", a:"Danielle L. Jensen"},
+  {s:"The Serpent and the Wings of Night (Crowns of Nyaxia)", a:"Carissa Broadbent"},
+  {s:"Daughter of the Moon Goddess", a:"Sue Lynn Tan"},
+  {s:"Divine Rivals (Letters of Enchantment)", a:"Rebecca Ross"},
+  {s:"Elements of Cadence (A River Enchanted)", a:"Rebecca Ross"},
+  {s:"Powerless",                    a:"Lauren Roberts"},
+  {s:"Lightlark",                    a:"Alex Aster"},
+  {s:"The Shadows Between Us",       a:"Tricia Levenseller"},
+  {s:"Hunting Adeline (Cat and Mouse)", a:"H.D. Carlton"},
+  {s:"Kingdom of the Wicked",        a:"Kerri Maniscalco"},
+  {s:"Throne of the Fallen",         a:"Kerri Maniscalco"},
+  {s:"House of Salt and Sorrows",    a:"Erin A. Craig"},
+  {s:"Hooked (Never After)",         a:"Emily McIntire"},
+  {s:"The Ravenhood (Flock)",        a:"Kate Stewart"},
+  {s:"Gild (The Plated Prisoner)",   a:"Raven Kennedy"},
+  {s:"Neon Gods (Dark Olympus)",     a:"Katee Robert"},
+  {s:"A Touch of Darkness (Hades x Persephone)", a:"Scarlett St. Clair"},
+  {s:"The Love Hypothesis",          a:"Ali Hazelwood"},
+  {s:"Bride",                        a:"Ali Hazelwood"},
+  {s:"Quicksilver (Fae & Alchemy)",  a:"Callie Hart"},
+  {s:"The Prison Healer",            a:"Lynette Noni"},
+  {s:"Spark of the Everflame",       a:"Penn Cole"},
+  {s:"Heir of Fire and Fury",        a:"Kay L. Moody"},
+  {s:"The Wrath and the Dawn",       a:"Renée Ahdieh"},
+  {s:"Flame in the Mist",            a:"Renée Ahdieh"},
+  {s:"An Ember in the Ashes",        a:"Sabaa Tahir"},
+  {s:"We Hunt the Flame (Sands of Arawiya)", a:"Hafsah Faizal"},
+  {s:"Children of Blood and Bone (Legacy of Orïsha)", a:"Tomi Adeyemi"},
+  {s:"Raybearer",                    a:"Jordan Ifueko"},
+  {s:"The Gilded Ones",              a:"Namina Forna"},
+  {s:"Iron Widow",                   a:"Xiran Jay Zhao"},
+  {s:"These Violent Delights",       a:"Chloe Gong"},
+  {s:"The Atlas Six (Atlas)",        a:"Olivie Blake"},
+  {s:"A Deadly Education",           a:"Naomi Novik"},
+  {s:"Serpent & Dove",               a:"Shelby Mahurin"},
+  {s:"The Shadow of the Fox",        a:"Julie Kagawa"},
+  {s:"The Iron Fey",                 a:"Julie Kagawa"},
+  {s:"Sorcery of Thorns",            a:"Margaret Rogerson"},
+  {s:"An Enchantment of Ravens",     a:"Margaret Rogerson"},
+  {s:"Vespertine",                   a:"Margaret Rogerson"},
+  {s:"Half a Soul (Regency Faerie Tales)", a:"Olivia Atwater"},
+  {s:"Howl's Moving Castle",         a:"Diana Wynne Jones"},
+  {s:"The Chronicles of Chrestomanci", a:"Diana Wynne Jones"},
+  // Asian-inspired & Silkpunk
+  {s:"The Dandelion Dynasty",        a:"Ken Liu"},
+  {s:"She Who Became the Sun (Radiant Emperor)", a:"Shelley Parker-Chan"},
+  {s:"The Green Bone Saga (Jade City)", a:"Fonda Lee"},
+  {s:"The Singing Hills Cycle",      a:"Nghi Vo"},
+  {s:"The Grace of Kings",           a:"Ken Liu"},
+  {s:"Descendant of the Crane",      a:"Joan He"},
+  {s:"Strike the Zither (Kingdom of Three)", a:"Joan He"},
+  {s:"Jade War",                     a:"Fonda Lee"},
+  {s:"The Sword of Kaigen",          a:"M.L. Wang"},
+  {s:"Blood Over Bright Haven",      a:"M.L. Wang"},
+  {s:"The Hundred Thousand Kingdoms", a:"N.K. Jemisin"},
+  {s:"Legends of the Condor Heroes", a:"Jin Yong"},
+  {s:"The Poppy War",                a:"R.F. Kuang"},
+  {s:"Six Crimson Cranes",           a:"Elizabeth Lim"},
+  {s:"Spin the Dawn (The Blood of Stars)", a:"Elizabeth Lim"},
+  {s:"The Ghost Bride",              a:"Yangsze Choo"},
+  {s:"Black Water Sister",           a:"Zen Cho"},
+  {s:"Sorcerer to the Crown",        a:"Zen Cho"},
+  // Norse, Historical & Mythic
+  {s:"The Gospel of Loki",           a:"Joanne M. Harris"},
+  {s:"Norse Mythology",              a:"Neil Gaiman"},
+  {s:"The Hanged God Trilogy",       a:"Thilde Kold Holdt"},
+  {s:"The Wolf in the Whale",        a:"Jordanna Max Brodsky"},
+  {s:"The Witch's Heart",            a:"Genevieve Gornichec"},
+  {s:"The Weaver and the Witch Queen", a:"Genevieve Gornichec"},
+  {s:"Ariadne",                      a:"Jennifer Saint"},
+  {s:"Elektra",                      a:"Jennifer Saint"},
+  {s:"The Silence of the Girls",     a:"Pat Barker"},
+  {s:"Lore Olympus",                 a:"Rachel Smythe"},
+  {s:"Percy Jackson and the Olympians", a:"Rick Riordan"},
+  {s:"The Heroes of Olympus",        a:"Rick Riordan"},
+  {s:"The Kane Chronicles",          a:"Rick Riordan"},
+  {s:"Magnus Chase and the Gods of Asgard", a:"Rick Riordan"},
+  {s:"American Vampire",             a:"Scott Snyder"},
+  {s:"Vita Nostra",                  a:"Marina & Sergey Dyachenko"},
+  {s:"The Tombs of Atuan",           a:"Ursula K. Le Guin"},
+  {s:"The Buried Giant",             a:"Kazuo Ishiguro"},
+  {s:"Spear",                        a:"Nicola Griffith"},
+  {s:"Hild",                         a:"Nicola Griffith"},
+  {s:"The Mists of Avalon",          a:"Marion Zimmer Bradley"},
+  {s:"The Winter King (Warlord Chronicles)", a:"Bernard Cornwell"},
+  {s:"The Green Man's Heir",         a:"Juliet E. McKenna"},
+  // Weird, Horror & New Weird
+  {s:"The Southern Reach (Annihilation)", a:"Jeff VanderMeer"},
+  {s:"Perdido Street Station (Bas-Lag)", a:"China Miéville"},
+  {s:"The City & The City",          a:"China Miéville"},
+  {s:"The Scar",                     a:"China Miéville"},
+  {s:"Kraken",                       a:"China Miéville"},
+  {s:"Gideon the Ninth (The Locked Tomb)", a:"Tamsyn Muir"},
+  {s:"The Fisherman",                a:"John Langan"},
+  {s:"Between Two Fires",            a:"Christopher Buehlman"},
+  {s:"The Blacktongue Thief",        a:"Christopher Buehlman"},
+  {s:"The Daughters' War",           a:"Christopher Buehlman"},
+  {s:"The Troop",                    a:"Nick Cutter"},
+  {s:"Mexican Gothic",               a:"Silvia Moreno-Garcia"},
+  {s:"Gods of Jade and Shadow",      a:"Silvia Moreno-Garcia"},
+  {s:"The Ballad of Black Tom",      a:"Victor LaValle"},
+  {s:"Ring Shout",                   a:"P. Djèlí Clark"},
+  {s:"The Dead Djinn Universe (A Master of Djinn)", a:"P. Djèlí Clark"},
+  {s:"The Library of the Dead",      a:"T.L. Huchu"},
+  {s:"The Craft Sequence",           a:"Max Gladstone"},
+  {s:"This Is How You Lose the Time War", a:"Amal El-Mohtar & Max Gladstone"},
+  // Standalone & misc favorites
+  {s:"The Blade Itself",             a:"Joe Abercrombie"},
+  {s:"The Curse of Chalion (World of the Five Gods)", a:"Lois McMaster Bujold"},
+  {s:"Penric and Desdemona",         a:"Lois McMaster Bujold"},
+  {s:"Paladin's Grace (The Saint of Steel)", a:"T. Kingfisher"},
+  {s:"Nettle & Bone",                a:"T. Kingfisher"},
+  {s:"Swordheart",                   a:"T. Kingfisher"},
+  {s:"A Wizard's Guide to Defensive Baking", a:"T. Kingfisher"},
+  {s:"The Tea Master and the Detective (Xuya)", a:"Aliette de Bodard"},
+  {s:"Dominion of the Fallen",       a:"Aliette de Bodard"},
+  {s:"The First Sister Trilogy",     a:"Linden A. Lewis"},
+  {s:"Chorus of Dragons (A Chorus of Dragons)", a:"Jenn Lyons"},
+  {s:"The Ruin of Kings",            a:"Jenn Lyons"},
+  {s:"A Practical Guide to Sorcery", a:"Azalea Ellis"},
+  {s:"The Nightrunner Series",       a:"Lynn Flewelling"},
+  {s:"The Tamír Triad",              a:"Lynn Flewelling"},
+  {s:"Tortall: Song of the Lioness", a:"Tamora Pierce"},
+  {s:"The Immortals Quartet",        a:"Tamora Pierce"},
+  {s:"Protector of the Small",       a:"Tamora Pierce"},
+  {s:"Circle of Magic",              a:"Tamora Pierce"},
+  {s:"Graceling Realm",              a:"Kristin Cashore"},
+  {s:"The Queen's Thief",            a:"Megan Whalen Turner"},
+  {s:"Crown Duel",                   a:"Sherwood Smith"},
+  {s:"The Abhorsen Trilogy (Old Kingdom)", a:"Garth Nix"},
+  {s:"Keys to the Kingdom",          a:"Garth Nix"},
+  {s:"The Bartimaeus Trilogy",       a:"Jonathan Stroud"},
+  {s:"Lockwood & Co.",               a:"Jonathan Stroud"},
+  {s:"Artemis Fowl",                 a:"Eoin Colfer"},
+  {s:"Ranger's Apprentice",          a:"John Flanagan"},
+  {s:"Brotherband Chronicles",       a:"John Flanagan"},
+  {s:"Fablehaven",                   a:"Brandon Mull"},
+  {s:"Beyonders",                    a:"Brandon Mull"},
+  {s:"The Edge Chronicles",          a:"Paul Stewart & Chris Riddell"},
+  {s:"Redwall",                      a:"Brian Jacques"},
+  {s:"Warriors",                     a:"Erin Hunter"},
+  {s:"Wings of Fire",                a:"Tui T. Sutherland"},
+  {s:"Eragon",                       a:"Christopher Paolini"},
+  {s:"The Iron Trial (Magisterium)", a:"Holly Black & Cassandra Clare"},
+  {s:"The Mortal Instruments",       a:"Cassandra Clare"},
+  {s:"The Infernal Devices",         a:"Cassandra Clare"},
+  {s:"Miss Peregrine's Home for Peculiar Children", a:"Ransom Riggs"},
+  {s:"A Darker Shade of Magic",      a:"V.E. Schwab"},
+  {s:"The Bone Season",              a:"Samantha Shannon"},
+  {s:"A Day of Fallen Night",        a:"Samantha Shannon"},
+  {s:"The Roots of Chaos",           a:"Samantha Shannon"},
+  {s:"Vampire Chronicles (Interview with the Vampire)", a:"Anne Rice"},
+  {s:"Outlander",                    a:"Diana Gabaldon"},
+  {s:"The Time Traveler's Wife",     a:"Audrey Niffenegger"},
+  {s:"Jonathan Livingston Seagull",  a:"Richard Bach"},
+  {s:"The Kushiel's Legacy",         a:"Jacqueline Carey"},
+  {s:"The Sundering",                a:"Jacqueline Carey"},
+  {s:"Wraeththu",                    a:"Storm Constantine"},
+  {s:"The Black Jewels",             a:"Anne Bishop"},
+  {s:"The Sevenwaters Series",       a:"Juliet Marillier"},
+  {s:"Blackthorn & Grim",            a:"Juliet Marillier"},
+  {s:"Daughter of the Forest",       a:"Juliet Marillier"},
+  {s:"Wheel of the Infinite",        a:"Martha Wells"},
+  {s:"The Death of the Necromancer (Ile-Rien)", a:"Martha Wells"},
+  {s:"City of Bones",                a:"Martha Wells"},
+  {s:"Witch King",                   a:"Martha Wells"},
 ];
 
 // ── PROFILE SYSTEM ─────────────────────────────────────────
@@ -1291,7 +1635,7 @@ window.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => {
       document.getElementById('loading').style.display = 'none';
     }, 1300);
-  }, 5400);
+  }, 6100);
 });
 
 function startLoading() {
@@ -1394,17 +1738,35 @@ function makeSlot(index, mode) {
     activeIdx = -1;
     if (q.length < 1) { dropdown.classList.remove('open'); return; }
 
-    const matches = SERIES.filter(s =>
-      s.s.toLowerCase().includes(q) || s.a.toLowerCase().includes(q)
-    ).slice(0, 8);
+    // Rank: title prefix > title substring > author match
+    const scored = [];
+    for (const s of SERIES) {
+      const t = s.s.toLowerCase(), a = s.a.toLowerCase();
+      let score = -1;
+      if (t.startsWith(q)) score = 0;
+      else if (t.includes(q)) score = 1;
+      else if (a.includes(q)) score = 2;
+      if (score >= 0) scored.push({ ...s, score });
+    }
+    scored.sort((x, y) => x.score - y.score || x.s.localeCompare(y.s));
+    const matches = scored.slice(0, 10);
 
-    if (matches.length === 0) { dropdown.classList.remove('open'); return; }
+    // Always offer the typed text as a custom entry — any series counts,
+    // not just ones in the built-in catalogue.
+    const typed = input.value.trim();
+    const exact = matches.some(m => m.s.toLowerCase() === q);
+    if (!exact) matches.push({ s: typed, a: '', custom: true });
 
     dropdown.innerHTML = matches.map((m, i) =>
-      `<div class="drop-item" data-i="${i}">
-        <span class="drop-item-series">${esc(m.s)}</span>
-        <span class="drop-item-author">${esc(m.a)}</span>
-      </div>`
+      m.custom
+        ? `<div class="drop-item drop-item-custom" data-i="${i}">
+            <span class="drop-item-series">Use &ldquo;${esc(m.s)}&rdquo;</span>
+            <span class="drop-item-author">custom entry — press Enter</span>
+          </div>`
+        : `<div class="drop-item" data-i="${i}">
+            <span class="drop-item-series">${esc(m.s)}</span>
+            <span class="drop-item-author">${esc(m.a)}</span>
+          </div>`
     ).join('');
 
     dropdown._matches = matches;
@@ -1749,15 +2111,24 @@ async function consultOracle() {
 
   setUIState('loading');
 
-  const system = `You are a fantasy literature expert and librarian with encyclopedic knowledge of fantasy series. Recommend series based purely on the reader's taste profile — if they lean romantasy, reflect that; if grimdark or epic, reflect that. Respond only in valid JSON.`;
+  const system = `You are a master librarian with encyclopedic knowledge of fantasy literature — from famous epics to obscure indie gems, web serials, translated works, and every subgenre: epic, grimdark, romantasy, progression, cozy, urban, mythic, silkpunk, and new weird.
+
+How to recommend:
+1. First infer the reader's taste profile from their loved series: tone (whimsical vs grim), prose style, pacing, magic-system preference (hard vs soft), character focus, romance content, and subgenre leanings.
+2. Recommend series that match that inferred profile, not just superficially similar titles. Draw from the full breadth of fantasy — do not default to only the most famous series.
+3. Prefer variety: mix well-known and lesser-known picks across the reader's preferred subgenres.
+4. Be factually accurate about author names, book counts, and whether a series is finished. If unsure whether a series is complete, set is_complete to false.
+5. Every field must contain real, specific content about that series. Never output placeholder, generic, or filler text. Never invent series that do not exist.
+
+Respond with valid JSON only.`;
 
   let grContext = '';
   if (grData && grData.read.length > 0) {
-    grContext += ` The reader has already read the following books — do NOT recommend any of these or their series: ${grData.read.slice(0, 120).join('; ')}.`;
+    grContext += ` The reader has already read the following books — do NOT recommend any of these or their series: ${grData.read.slice(0, 250).join('; ')}.`;
     if (grData.loved.length > 0)
-      grContext += ` Books they rated 4–5 stars (strong taste signal): ${grData.loved.slice(0, 40).join('; ')}.`;
+      grContext += ` Books they rated 4–5 stars (strong taste signal): ${grData.loved.slice(0, 80).join('; ')}.`;
     if (grData.disliked.length > 0)
-      grContext += ` Books they rated 1–2 stars (disliked): ${grData.disliked.slice(0, 20).join('; ')}.`;
+      grContext += ` Books they rated 1–2 stars (disliked): ${grData.disliked.slice(0, 40).join('; ')}.`;
   }
 
   let banContext = '';
@@ -1772,7 +2143,7 @@ async function consultOracle() {
 
   const completedOnly = document.getElementById('completed-only-toggle').checked;
   const completedConstraint = completedOnly ? ' CRITICAL: ONLY recommend series where ALL books are already published and the series is fully complete (is_complete: true). Do NOT include any ongoing, unfinished, or in-progress series under any circumstances.' : '';
-  const user = `A reader enjoys these series: ${loved.join(', ')}.${banContext}${grContext}${completedConstraint} Recommend exactly 12 fantasy series NOT in the reader's loved list above, ordered from best match to good match. Keep one_sentence_description under 20 words. Keep why_this_reader under 30 words. Return ONLY a valid JSON array with no extra text, where each object has exactly these keys: { "title": string, "author": string, "books_in_series": integer, "is_complete": boolean, "one_sentence_description": string, "why_this_reader": string, "subgenre": string }.`;
+  const user = `A reader enjoys these series: ${loved.join(', ')}.${banContext}${grContext}${completedConstraint} Recommend exactly 18 fantasy series. NEVER include any series from the reader's loved list or anything they have already read — every recommendation must be new to them. Order them from best match to good match. Write one_sentence_description as one vivid sentence and why_this_reader as one or two specific sentences tied to this reader's taste. Return ONLY a valid JSON array with no extra text, where each object has exactly these keys: { "title": string, "author": string, "books_in_series": integer, "is_complete": boolean, "one_sentence_description": string, "why_this_reader": string, "subgenre": string }.`;
 
   try {
     let res;
@@ -1787,7 +2158,7 @@ async function consultOracle() {
         },
         body: JSON.stringify({
           model: 'claude-sonnet-4-6',
-          max_tokens: 8000,
+          max_tokens: 12000,
           system,
           messages: [{ role: 'user', content: user }]
         })
@@ -1849,13 +2220,26 @@ async function consultOracle() {
       if (!recs.length) throw new Error('No recommendations remained after author filtering');
     }
 
-    // Safety net: drop any rec whose title matches the loved list
-    const lovedNorm = loved.map(norm);
-    recs = recs.filter(r => !lovedNorm.some(l => norm(r.title).includes(l) || l.includes(norm(r.title))));
+    // Safety net: drop any rec whose title matches the loved list.
+    // Substring containment only counts when the shorter side is long
+    // enough to be meaningful — otherwise require an exact match, so a
+    // short title like "Dune" can't wipe out unrelated recs.
+    const lovedNorm = loved.map(norm).filter(Boolean);
+    const overlaps = (a, b) => {
+      if (a === b) return true;
+      const shorter = Math.min(a.length, b.length);
+      return shorter >= 6 && (a.includes(b) || b.includes(a));
+    };
+    recs = recs.filter(r => !lovedNorm.some(l => overlaps(norm(r.title), l)));
 
-    // Safety net: drop recs with placeholder / stub text in key fields
-    const isStub = s => !s || /placeholder|lorem ipsum|tbd|n\/a/i.test(s) || String(s).trim().length < 5;
-    recs = recs.filter(r => !isStub(r.title) && !isStub(r.one_sentence_description) && !isStub(r.why_this_reader));
+    // Safety net: drop recs with placeholder / stub text. Titles only need
+    // to be non-empty and real; length checks apply to the prose fields.
+    const hasPlaceholder = s => /placeholder|lorem ipsum|\btbd\b|\bn\/a\b/i.test(String(s || ''));
+    const stubProse = s => !s || hasPlaceholder(s) || String(s).trim().length < 15;
+    recs = recs.filter(r =>
+      r.title && String(r.title).trim() && !hasPlaceholder(r.title) &&
+      !stubProse(r.one_sentence_description) && !stubProse(r.why_this_reader)
+    );
 
     // Safety net: if completed-only toggle is on, drop ongoing series
     if (completedOnly) {
